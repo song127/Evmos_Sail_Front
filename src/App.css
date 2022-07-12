@@ -1,0 +1,89 @@
+.App {
+  text-align: center;
+}
+
+.row { /* 꽉 차지않는 row */
+  width: max-content;
+  height: max-content;
+  display: flex;
+  flex-direction: row;
+}
+
+.f-row { /* 부모에 꽉 차는 row */
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.all-f-row {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.column { /* 꽉 차지않는 column */
+  width: max-content;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+}
+
+.f-column { /* 부모에 꽉 차는 column */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.all-f-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.j-center {
+  justify-content: center;
+}
+
+.j-start {
+  justify-content: start;
+}
+
+.j-end {
+  justify-content: end;
+}
+
+.j-space {
+  justify-content: space-between;
+}
+
+.a-center {
+  align-items: center;
+}
+
+.a-start {
+  align-items: start;
+}
+
+.a-end {
+  justify-content: end;
+}
+
+/*.a-space {*/
+/*  align-items: ;*/
+/*}*/
+
+.h3 {
+  color: #2F2F36;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.h4 {
+  color: #1E1E1E;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
