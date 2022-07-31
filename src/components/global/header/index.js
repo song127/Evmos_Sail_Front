@@ -3,14 +3,13 @@ import {COLORS as c} from "../../../styles/colors";
 import {ReactComponent as Logo} from "../../../assets/images/img-header-logo.svg";
 import Spacer from "../../utils/blocks/Spacer";
 import SizeBox from "../../utils/blocks/SizeBox";
-import {useEffect, useLayoutEffect, useState} from "react";
 import useMediaQuery from "react-responsive";
 import {Link, useNavigate} from "react-router-dom";
 import SquareBtn from "../SquareBtn";
 import {useDispatch, useSelector} from "react-redux";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import {ContentLoaded} from "../../utils/actions/ContentLoaded";
-import AuthAPI from "../../../api/AuthAPI";
+import {BLOCK_ACTION_TYPES} from "../../../redux/blockchain/blockchainReducer";
 
 const Container = styled.div`
   display: flex;
@@ -63,8 +62,8 @@ const MenuItem = styled.div`
 
 function Header() {
     const dispatch = useDispatch();
-    const data = useSelector(state => state.data.auth);
-    const authApi = new AuthAPI();
+    const data = useSelector(state => state.data);
+    const blockchain = useSelector(state => state.blockchain);
     const navigator = useNavigate();
 
     const menuList = [
@@ -78,16 +77,15 @@ function Header() {
     });
 
     const handleLogin = async () => {
-        await authApi.logout();
-        dispatch({type: DATA_TYPES.HEADER, data: false});
-        dispatch({type: DATA_TYPES.AUTH, data: false});
-        navigator('/');
+        dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
+        dispatch({type: DATA_TYPES.DATA_RESET});
+        localStorage.removeItem(DATA_TYPES.AUTH);
     }
 
     return (
         <Container>
             <Inner>
-                <Logo/>
+                <Logo onClick={() => navigator('/Short')} style={{cursor: 'pointer'}}/>
 
                 <SizeBox w={27}/>
                 {
@@ -106,7 +104,7 @@ function Header() {
 
                 <SizeBox w={144} h={36}>
                     <SquareBtn type={1} active={true} onClick={() => handleLogin()}>
-                        {data.auth ? 'Logout' : 'Login'}
+                        {blockchain.account ? 'Disconnect' : 'Connect'}
                     </SquareBtn>
                 </SizeBox>
             </Inner>

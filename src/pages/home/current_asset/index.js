@@ -303,7 +303,6 @@ function CurrentAsset() {
                         <Heart/>
 
                         <SizeBox w={20}/>
-                        nnnn
                     </div>
                 </BackBoard>
 

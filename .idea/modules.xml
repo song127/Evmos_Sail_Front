@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/sail_frontend.iml" filepath="$PROJECT_DIR$/.idea/sail_frontend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../sail_front_new/.idea/sail_front_new.iml" filepath="$PROJECT_DIR$/../sail_front_new/.idea/sail_front_new.iml" />
     </modules>
   </component>
 </project>

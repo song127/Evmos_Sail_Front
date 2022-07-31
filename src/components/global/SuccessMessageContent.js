@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 import {CompleteTypes, ToastOptions} from "../../pages/home/short_selling";
-import ConfirmBtn from "../ConfirmBtn";
+import ConfirmBtn from "./ConfirmBtn";
 import SizeBox from "../utils/blocks/SizeBox";
 
 function SuccessMessageContent({type, link, close}) {

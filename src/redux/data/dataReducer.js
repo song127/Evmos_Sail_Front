@@ -1,15 +1,14 @@
 export const DATA_TYPES = {
   AUTH: 'AUTH',
-  MENU: 'MENU',
   HEADER: 'HEADER',
+  MENU: 'MENU',
   TAB: 'TAB',
-  RESET: 'RESET'
+  DATA_RESET: 'DATA_RESET'
 }
 
 const initialState = {
-  auth: false,
-  menu: 'short',
   header: false,
+  menu: 'short',
   tab: 0,
 };
 
@@ -17,9 +16,6 @@ export const dataReducer = (state = initialState, action) => {
   let resultState = {...state};
 
   switch (action.type) {
-    case DATA_TYPES.AUTH:
-      resultState.auth = action.data;
-      break;
     case DATA_TYPES.HEADER:
       resultState.header = action.data;
       break;
@@ -29,8 +25,8 @@ export const dataReducer = (state = initialState, action) => {
     case DATA_TYPES.TAB:
       resultState.tab = action.data;
       break;
-    case DATA_TYPES.RESET:
-      resultState = {...initialState};
+    case DATA_TYPES.DATA_RESET:
+      resultState = initialState;
       break;
     default:
   }

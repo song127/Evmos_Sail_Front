@@ -14,7 +14,7 @@ import BorderButton from "../../../components/global/BorderButton";
 import ToastMessage, {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
 import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
 import {CompleteTypes} from "../short_selling";
-import ActionsAPI from "../../../api/ActionsAPI";
+import ActionsAPI from "../../../network/ActionsAPI";
 
 const Container = styled.div`
   display: flex;
@@ -157,8 +157,10 @@ function DepositAndWithdraw() {
 
     // GetDatas
     const getDatas = async () => {
-        const balance = await actionApi.getMyDaiBalance(blockchain);
-        setAvailableDAI(balance);
+        if(blockchain.account) {
+            const balance = await actionApi.getMyDaiBalance(blockchain);
+            setAvailableDAI(balance);
+        }
     }
 
     useEffect(() => {

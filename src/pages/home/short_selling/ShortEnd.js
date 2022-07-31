@@ -14,7 +14,7 @@ import BorderButton from "../../../components/global/BorderButton";
 import {ReactComponent as Gas} from "../../../assets/icons/icon-gas-station.svg";
 import {ReactComponent as Heart} from "../../../assets/icons/icon-heart.svg";
 import {useSelector} from "react-redux";
-import ActionsAPI from "../../../api/ActionsAPI";
+import ActionsAPI from "../../../network/ActionsAPI";
 
 const Backboard_1 = styled.div`
   display: flex;

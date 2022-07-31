@@ -3,6 +3,7 @@ export const BLOCK_ACTION_TYPES = {
     CONNECTION_SUCCESS: 'CONNECTION_SUCCESS',
     CONNECTION_FAILED: 'CONNECTION_FAILED',
     UPDATE_ACCOUNT: 'UPDATE_ACCOUNT',
+    BLOCK_RESET: 'BLOCK_RESET',
 };
 
 const initialState = {
@@ -10,7 +11,7 @@ const initialState = {
     account: null,
     smartContract: null,
     web3: null,
-    errorMsg: "",
+    errorMsg: "It worked at only kovan network",
 };
 
 const blockchainReducer = (state = initialState, action) => {
@@ -28,11 +29,13 @@ const blockchainReducer = (state = initialState, action) => {
             break;
         case BLOCK_ACTION_TYPES.CONNECTION_FAILED:
             resultState.loading = false;
-            resultState.errorMsg = action.payload.errorMsg;
+            resultState.errorMsg = action.payload;
             break;
         case BLOCK_ACTION_TYPES.UPDATE_ACCOUNT:
             resultState.account = action.payload.account;
             break;
+        case BLOCK_ACTION_TYPES.BLOCK_RESET:
+            resultState = initialState;
         default:
     }
 

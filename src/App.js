@@ -4,18 +4,13 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import styled from "styled-components";
 import {useDispatch, useSelector} from "react-redux";
 import {connect} from "./redux/blockchain/blockchainActions";
-import {fetchData} from "./redux/data/dataActions";
-import LandingPage from "./pages/onboarding/landingPage";
-import Test from "./pages/test";
 import ScrollToTop from "./components/utils/actions/ScrollTop";
 import Header from "./components/global/header";
 import DepositAndWithdraw from "./pages/home/deposit_and_withdraw";
 import ShortSelling from "./pages/home/short_selling";
 import CurrentAsset from "./pages/home/current_asset";
-import CheckToken from "./components/utils/actions/CheckToken";
-import SignInPage from "./pages/onboarding/signIn";
-import SignUpPage from "./pages/onboarding/signUp";
-import ResetPassPage from "./pages/onboarding/resetPass";
+import CheckConnect from "./components/utils/actions/CheckConnect";
+import ConnectWallet from "./pages/home/ConnectWallet";
 
 const BodyInner = styled.div`
   display: flex;
@@ -31,13 +26,10 @@ function App() {
         <>
             <BodyInner>
                 <ScrollToTop/>
-                <CheckToken/>
+                <CheckConnect/>
                 {headerOn ? <Header/> : null}
                 <Routes>
-                    <Route path={'/'} exact={true} element={<SignInPage/>}/>
-                    <Route path={'/SignUp'} exact={true} element={<SignUpPage/>}/>
-                    <Route path={'/ResetPass'} exact={true} element={<ResetPassPage/>}/>
-                    <Route path={'/Landing'} element={<LandingPage/>}/>
+                    <Route path={'/Connect'} element={<ConnectWallet/>}/>
                     <Route path={'/Transaction'} element={<DepositAndWithdraw/>}/>
                     <Route path={'/Short'} element={<ShortSelling/>}/>
                     <Route path={'/Asset'} element={<CurrentAsset/>}/>

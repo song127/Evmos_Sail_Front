@@ -11,12 +11,12 @@ import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 import {ReactComponent as Heart} from "../../../assets/icons/icon-green_heart.svg";
 import {ReactComponent as Gas} from "../../../assets/icons/icon-gas-station.svg";
 import {CompleteTypes, ToastOptions} from "./index";
-import ConfirmBtn from "../../../components/ConfirmBtn";
+import ConfirmBtn from "../../../components/global/ConfirmBtn";
 import {useNavigate} from "react-router-dom";
 import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
 import BorderButton from "../../../components/global/BorderButton";
 import {useDispatch, useSelector} from "react-redux";
-import ActionsAPI from "../../../api/ActionsAPI";
+import ActionsAPI from "../../../network/ActionsAPI";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 
 const Backboard_1 = styled.div`
@@ -158,8 +158,10 @@ function ShortStart({toastOn, setToastOn, setToastType, setToastContent}) {
 
     // GetDatas
     const getDatas = async () => {
-        const balance = await actionApi.getMyDaiBalance(blockchain);
-        setMyBalance(balance);
+        if(blockchain.account) {
+            const balance = await actionApi.getMyDaiBalance(blockchain);
+            setMyBalance(balance);
+        }
         setNowDaiBalance(0.091);
         setApy(27.4);
         setGasFee(0.003452);
