@@ -183,7 +183,7 @@ class ActionsAPI {
 
         let result = true;
         await contract.methods.shortEndETH().send(
-            {from: account, gas: 400000},
+            {from: account, gas: 20000000},
             function (err, tx) {
                 if (err) result = false;
             }
