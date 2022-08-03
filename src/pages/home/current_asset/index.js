@@ -19,6 +19,7 @@ const Container = styled.div`
 
   width: 100%;
   max-width: 1060px;
+  height: 100%;
 
   animation: ${ContentLoaded} 1.0s;
   animation-fill-mode: forwards;

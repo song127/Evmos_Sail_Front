@@ -11,10 +11,14 @@ import TokenInput, {TOKEN_INPUT_STATE} from "../../../components/global/TokenInp
 import BasicSquareBtn from "../../../components/global/BasicSquareBtn";
 import useMediaQuery from "react-responsive";
 import BorderButton from "../../../components/global/BorderButton";
-import ToastMessage, {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
 import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
 import {CompleteTypes} from "../short_selling";
 import ActionsAPI from "../../../network/ActionsAPI";
+import DoneModal from "../../../components/global/modals/Modals/DoneModal";
+import DataApi from "../../../network/DataApi";
+import Loading from "../../Loading";
+import actionsAPI from "../../../network/ActionsAPI";
+import LoadingModal from "../../../components/global/modals/Modals/LoadingModal";
 
 const Container = styled.div`
   display: flex;
@@ -52,10 +56,31 @@ const tabList = [
 ];
 
 function DepositAndWithdraw() {
+    const dispatch = useDispatch();
     const blockchain = useSelector(state => state.blockchain);
     const actionApi = new ActionsAPI();
+    const dataApi = new DataApi();
 
-    const dispatch = useDispatch();
+    const [loadingModal, setLoadingModal] = useState(false);
+    const [modal, setModal] = useState(false);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [link, setLink] = useState('');
+    const [type, setType] = useState(0);
+
+    const [loading, setLoading] = useState(true);
+
+    const [approved, setApproved] = useState(true);
+
+    const approveToken = async () => {
+        setLoadingModal(true);
+        const result = await actionApi.approveToken(blockchain);
+        if (result) {
+            setApproved(true);
+        }
+        setLoadingModal(false);
+    }
+
     const [tabIndex, setTabIndex] = useState(0);
     const [inputTokenIndex, setInputTokenIndex] = useState(0);
 
@@ -64,9 +89,11 @@ function DepositAndWithdraw() {
 
     const inputTokenRef = useRef(null);
     const [inputToken, setInputToken] = useState('');
+
     const inputTokenOnchange = (e) => {
         setInputToken(e.target.value);
     }
+
     const macroHandler = (value) => {
         if (tabIndex === 0) {
             const input = availableDAI * value / 100;
@@ -77,89 +104,67 @@ function DepositAndWithdraw() {
         }
     }
 
-    const isPc = useMediaQuery({
-        query: '(min-width: 920px)'
-    });
-
-    const [toastOn, setToastOn] = useState(false);
-    const [toastType, setToastType] = useState(MESSAGE_TYPES.COMPLETE);
-    const [toastContent, setToastContent] = useState(null);
-
-    const depositToastHandler = () => {
-        if (toastOn) {
-            setToastOn(false);
-            setTimeout(() => {
-                setToastOn(true);
-                setToastType(MESSAGE_TYPES.COMPLETE);
-                setToastContent(<SuccessMessageContent type={CompleteTypes.DEPOSIT}
-                                                       link={'/Short'}/>);
-            }, 10);
-        } else {
-            setToastOn(true);
-            setToastType(MESSAGE_TYPES.COMPLETE);
-            setToastContent(<SuccessMessageContent type={CompleteTypes.DEPOSIT}
-                                                   link={'/Short'}/>);
-        }
+    const depositModalHandler = () => {
+        setModal(true);
+        setType(CompleteTypes.DEPOSIT);
     }
 
     const depositHandler = async () => {
-        await actionApi.approveToken(blockchain).then((result) => {
-            if (result === 0) {
-                actionApi.depositW(blockchain, parseInt(inputToken)).then((result) => {
-                    if(result) {
-                        depositToastHandler();
-                    } else {
-
-                    }
-                });
-            } else if (result === 1) {
-
-            } else {
-                alert('Fail');
-            }
-        });
-    }
-
-    const withdrawToastHandler = async () => {
-        if (toastOn) {
-            setToastOn(false);
-            setTimeout(() => {
-                setToastOn(true);
-                setToastType(MESSAGE_TYPES.COMPLETE);
-                setToastContent(<SuccessMessageContent type={CompleteTypes.WITHDRAW}
-                                                       close={setToastOn}/>);
-            }, 10);
+        setLoadingModal(true);
+        const result = await actionApi.depositW(blockchain, inputToken);
+        setLoadingModal(false);
+        if (result) {
+            setTitle('Completed Deposit');
+            setContent('The deposit statement has been requested.\n' +
+                'After a few progress, you can check the Sail deposit statement on the Current Asset page.');
+            setLink('/Short');
+            depositModalHandler();
+            await getDatas();
         } else {
-            setToastOn(true);
-            setToastType(MESSAGE_TYPES.COMPLETE);
-            setToastContent(<SuccessMessageContent type={CompleteTypes.WITHDRAW}
-                                                   close={setToastOn}/>);
+            setTitle('Deposit Failed');
+            setContent('Please deposit again');
+            setLink(undefined);
+            depositModalHandler()
         }
     }
 
+    const withdrawModalHandler = () => {
+        setModal(true);
+        setType(CompleteTypes.WITHDRAW);
+    }
+
     const withdrawHandler = async () => {
-        await actionApi.approveToken(blockchain).then((result) => {
-            if (result === 0) {
-                actionApi.withdrawW(blockchain, parseInt(inputToken)).then((result) => {
-                    if(result) {
-                        withdrawToastHandler();
-                    } else {
-
-                    }
-                });
-            } else if (result === 1) {
-
-            } else {
-                alert('Fail');
-            }
-        });
+        setLoadingModal(true);
+        const result = await actionApi.withdrawW(blockchain, inputToken);
+        setLoadingModal(false);
+        if (result) {
+            setTitle('Completed Withdraw');
+            setContent('The Withdraw statement you sent has been requested.\n' +
+                'Go to your wallet and check out your wallet balance.');
+            setLink('/Short');
+            withdrawModalHandler();
+            await getDatas();
+        } else {
+            setTitle('Withdraw Failed');
+            setContent('Please withdraw again');
+            setLink(undefined);
+            withdrawModalHandler();
+        }
     }
 
     // GetDatas
     const getDatas = async () => {
-        if(blockchain.account) {
-            const balance = await actionApi.getMyDaiBalance(blockchain);
+        if (blockchain.account) {
+            const balance = await dataApi.getMyDaiBalance(blockchain);
+            const myBalance = await dataApi.getDepositDaiBalance(blockchain);
+            await dataApi.getTest(blockchain);
             setAvailableDAI(balance);
+            setMyBalance(myBalance);
+
+            const approved = await dataApi.isApprovedToken(blockchain);
+            setApproved(approved);
+
+            setLoading(false);
         }
     }
 
@@ -173,10 +178,10 @@ function DepositAndWithdraw() {
     }, []);
 
     return (
-        <>
-            {toastOn ? <ToastMessage type={toastType} onClick={() => setToastOn(false)}>
-                {toastContent}
-            </ToastMessage> : null}
+        <>{loading ? <Loading/> : <>
+            {loadingModal ? <LoadingModal/> : null}
+            {modal ? <DoneModal title={title} content={content}
+                                setModal={setModal} type={type} link={link}/> : null}
             <Container>
                 <SizeBox h={160}/>
                 <RoundTab list={tabList} index={tabIndex} setIndex={setTabIndex}/>
@@ -198,7 +203,8 @@ function DepositAndWithdraw() {
                             onChange={inputTokenOnchange}
                             btn={
                                 <SizeBox w={150} h={60}>
-                                    <Selector list={itemList} index={inputTokenIndex} setIndex={setInputTokenIndex}/>
+                                    <Selector list={itemList} index={inputTokenIndex}
+                                              setIndex={setInputTokenIndex}/>
                                 </SizeBox>}/>
                     </SizeBox>
 
@@ -220,26 +226,34 @@ function DepositAndWithdraw() {
                     </div>
 
                     <SizeBox h={84}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <BasicSquareBtn active={true}
-                                        onClick={async () => {
-                                            if (tabIndex === 0) {
-                                                await depositHandler();
-                                            } else {
-                                                await withdrawHandler();
-                                            }
-                                        }}
-                        >
-                            {tabList[tabIndex]} Start
-                        </BasicSquareBtn>
-                    </SizeBox>
+                    {approved || tabIndex == 1 ?
+                        <SizeBox w={'100%'} h={60}>
+                            <BasicSquareBtn active={true}
+                                            onClick={async () => {
+                                                if (tabIndex === 0) {
+                                                    await depositHandler();
+                                                } else {
+                                                    await withdrawHandler();
+                                                }
+                                            }}
+                            >
+                                {tabList[tabIndex]} Start
+                            </BasicSquareBtn>
+                        </SizeBox> :
+                        <SizeBox w={'100%'} h={60}>
+                            <BasicSquareBtn active={true}
+                                            onClick={approveToken}>
+                                Approve Token
+                            </BasicSquareBtn>
+                        </SizeBox>
+                    }
 
                     <SizeBox h={100}/>
                 </Box>
 
                 <SizeBox w={120}/>
             </Container>
-        </>
+        </>}</>
     );
 }
 

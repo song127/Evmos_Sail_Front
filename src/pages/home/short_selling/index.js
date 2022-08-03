@@ -15,14 +15,11 @@ import Visibility from "../../../components/utils/blocks/Visibility";
 import ShortStart from "./ShortStart";
 import ShortEnd from "./ShortEnd";
 import ToastMessage, {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
-
-const Stack = styled.div`
-  position: relative;
-`;
+import Loading from "../../Loading";
+import DoneModal from "../../../components/global/modals/Modals/DoneModal";
+import LoadingModal from "../../../components/global/modals/Modals/LoadingModal";
 
 const Container = styled.div`
-  position: absolute;
-
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,34 +41,24 @@ export const CompleteTypes = {
     WITHDRAW: 1,
     SHORT_START: 2,
     SHORT_END: 3,
-    DEPOSIT_TO_SHORT: 4,
+    DEPOSIT_REQUIRE: 4,
 };
 
-export const ToastOptions = [
+export const ModalOptions = [
     {
-        name: 'Go to Short',
-        content: 'The deposit statement has been requested.' +
-            'After a few progress, you can check the Sail deposit statement on the Current Asset page.'
+        name: 'Go to Short'
     },
     {
-        name: 'Confirm',
-        content: 'The Withdraw statement you sent has been requested.' +
-            'Go to your wallet and check out your wallet balance.'
+        name: ''
     },
     {
-        name: 'Confirm',
-        content: 'Short Start requirement has been sent to our server successfully.' +
-            'Good to go, bro!'
+        name: ''
     },
     {
-        name: 'Go to Asset',
-        content: 'Short End statement has been sent to our server successfully.' +
-            'Check out your Sail Deposit deposit on the Current Asset page.'
+        name: 'Go to Asset'
     },
     {
-        name: 'Go to Deposit',
-        content: 'Our short service could be used after progress of deposit.' +
-            'Please go to the Deposit page. '
+        name: 'Go to Deposit'
     },
 ];
 
@@ -79,6 +66,13 @@ function ShortSelling() {
     const dispatch = useDispatch();
     const tab = useSelector(state => state.data.tab);
     const [tabIndex, setTabIndex] = useState(0);
+
+    const [modal, setModal] = useState(false);
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [link, setLink] = useState('');
+    const [type, setType] = useState(0);
+    const [loadingModal, setLoadingModal] = useState(false);
 
     const isPc = useMediaQuery({
         query: '(min-width: 1080px)'
@@ -96,15 +90,10 @@ function ShortSelling() {
         setTabIndex(tab);
     }, []);
 
-    const [toastOn, setToastOn] = useState(false);
-    const [toastType, setToastType] = useState(MESSAGE_TYPES.COMPLETE);
-    const [toastContent, setToastContent] = useState(null);
-
     return (
-        <Stack>
-            {toastOn ? <ToastMessage type={toastType} onClick={() => setToastOn(false)}>
-                {toastContent}
-            </ToastMessage> : null}
+        <>
+            {loadingModal ? <LoadingModal/> : null}
+            {modal ? <DoneModal title={title} content={content} link={link} setModal={setModal} type={type}/> : null}
             <Container>
                 <SizeBox h={160}/>
                 <SizeBox w={520}>
@@ -112,21 +101,15 @@ function ShortSelling() {
                 </SizeBox>
 
                 <Visibility visibility={tabIndex === 0}>
-                    <ShortStart toastOn={toastOn}
-                                setToastOn={setToastOn}
-                                setToastType={setToastType}
-                                setToastContent={setToastContent}/>
+                    <ShortStart setTitle={setTitle} setContent={setContent} setLink={setLink} setModal={setModal} setType={setType} setLoadingModal={setLoadingModal}/>
                 </Visibility>
                 <Visibility visibility={tabIndex === 1}>
-                    <ShortEnd toastOn={toastOn}
-                              setToastOn={setToastOn}
-                              setToastType={setToastType}
-                              setToastContent={setToastContent}/>
+                    <ShortEnd setTitle={setTitle} setContent={setContent} setLink={setLink} setModal={setModal} setType={setType} setLoadingModal={setLoadingModal}/>
                 </Visibility>
 
                 <SizeBox h={120}/>
             </Container>
-        </Stack>
+        </>
     );
 }
 

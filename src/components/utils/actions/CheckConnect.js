@@ -1,6 +1,6 @@
 import {useDispatch, useSelector} from "react-redux";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
-import {useEffect, useLayoutEffect} from "react";
+import {useEffect} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {connect} from "../../../redux/blockchain/blockchainActions";
 import {BLOCK_ACTION_TYPES} from "../../../redux/blockchain/blockchainReducer";
@@ -28,34 +28,22 @@ function CheckConnect() {
         }
     }
 
-    const checkConnected = async () => {
-        const accounts = await window.ethereum.request({method: 'eth_accounts'});
-        if (accounts && accounts.length > 0) {
-        } else {
-            resetData();
-            dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
-            localStorage.removeItem(DATA_TYPES.AUTH);
-        }
-    }
-
     const isConnected = async () => {
-        if(auth) {
+        await dispatch(await connect());
+        if (auth) {
             dispatch({type: DATA_TYPES.HEADER, data: true});
-            await dispatch(await connect());
             moveToShort();
         } else {
-            resetData();
-            navigate('/Connect');
+            if(window.location.href.split('/').pop() !== 'Connect') {
+                navigate('/Connect');
+                resetData();
+            }
         }
     }
 
     useEffect(async () => {
-        await isConnected();
+        await isConnected()
     }, [auth, location]);
-
-    useEffect(async () => {
-        await checkConnected();
-    }, [blockchain.account]);
 
     return null;
 }

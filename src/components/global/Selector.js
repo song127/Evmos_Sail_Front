@@ -126,7 +126,7 @@ function Selector({list, index = 0, setIndex, disable = false, ...props}) {
             </SelectedValue>
             <OptionWrapper active={active}>
                 {list.map((value, idx) => (
-                    <OptionItem selected={index === idx} onClick={() => setIndex(idx)}>
+                    <OptionItem key={idx} selected={index === idx} onClick={() => setIndex(idx)}>
                         {value}
                     </OptionItem>
                 ))}

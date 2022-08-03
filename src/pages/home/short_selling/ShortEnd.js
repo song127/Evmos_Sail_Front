@@ -84,7 +84,7 @@ const itemList = ['DAI'];
 
 const shorItemList = ['ETH'];
 
-function ShortEnd({toastOn, setToastOn, setToastType, setToastContent}) {
+function ShortEnd({setTitle, setContent, setLink, setModal, setType, setLoadingModal}) {
     const blockchain = useSelector(state => state.blockchain);
     const actionApi = new ActionsAPI();
 
@@ -97,48 +97,26 @@ function ShortEnd({toastOn, setToastOn, setToastType, setToastContent}) {
     const [slippageIndex, setSlippageIndex] = useState(0);
 
     const shortEndHandler = async () => {
-        await actionApi.approveToken(blockchain).then((result) => {
-            if (result === 0) {
-                actionApi.shortEndW(blockchain).then((result) => {
-                    if(result) {
-                        toastHandler();
-                    } else {
-
-                    }
-                });
-            } else if (result === 1) {
-
-            } else {
-                alert('Fail');
-            }
-        });
-        blockchain.smartContract.methods.shortEnd().send(
-            {
-                from: blockchain.account
-            }
-        ).once("error", (err) => {
-            console.log('err : ' + err.toString());
-        }).then((receipt) => {
-                toastHandler();
-            }
-        );
+        setLoadingModal(true);
+        const result = await actionApi.shortEndW(blockchain);
+        if (result) {
+            setTitle('Successfully completed Short end');
+            setContent('Short end requirement has been sent to our server successfully.\n' +
+                'Good to go, bro!');
+            setLink('/Short');
+            modalHandler();
+        } else {
+            setTitle('Short Start Failed');
+            setContent('Please short start again\n');
+            setLink(undefined);
+            modalHandler();
+        }
+        setLoadingModal(false);
     }
 
-    const toastHandler = () => {
-        if (toastOn) {
-            setToastOn(false);
-            setTimeout(() => {
-                setToastOn(true);
-                setToastType(MESSAGE_TYPES.COMPLETE);
-                setToastContent(<SuccessMessageContent type={CompleteTypes.SHORT_END}
-                                                       link={'/Asset'}/>);
-            }, 10);
-        } else {
-            setToastOn(true);
-            setToastType(MESSAGE_TYPES.COMPLETE);
-            setToastContent(<SuccessMessageContent type={CompleteTypes.SHORT_END}
-                                                   link={'/Asset'}/>);
-        }
+    const modalHandler = () => {
+        setModal(true);
+        setType(CompleteTypes.SHORT_END);
     }
 
     return (

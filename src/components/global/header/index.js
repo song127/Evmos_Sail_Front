@@ -1,9 +1,8 @@
-import styled, {keyframes} from 'styled-components';
+import styled from 'styled-components';
 import {COLORS as c} from "../../../styles/colors";
 import {ReactComponent as Logo} from "../../../assets/images/img-header-logo.svg";
 import Spacer from "../../utils/blocks/Spacer";
 import SizeBox from "../../utils/blocks/SizeBox";
-import useMediaQuery from "react-responsive";
 import {Link, useNavigate} from "react-router-dom";
 import SquareBtn from "../SquareBtn";
 import {useDispatch, useSelector} from "react-redux";
@@ -72,9 +71,9 @@ function Header() {
         {url: '/asset', name: 'Current Asset', id: 'asset'},
     ]
 
-    const isPc = useMediaQuery({
-        query: '(min-width: 920px)'
-    });
+    // const isPc = useMediaQuery({
+    //     query: '(min-width: 920px)'
+    // });
 
     const handleLogin = async () => {
         dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
@@ -90,7 +89,7 @@ function Header() {
                 <SizeBox w={27}/>
                 {
                     menuList.map((menuInfo, index) => {
-                        return <SizeBox h={60}>
+                        return <SizeBox key={index} h={60}>
                             <Link to={menuInfo.url}>
                                 <MenuItem isSelected={data.menu === menuInfo.id}>
                                     {menuInfo.name}

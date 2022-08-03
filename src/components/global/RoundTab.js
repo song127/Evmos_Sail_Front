@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
-import SizeBox from "../utils/blocks/SizeBox";
 import RoundBtn from "./RoundBtn";
 
 const BackBoard = styled.div`
@@ -42,7 +41,7 @@ function RoundTab({list = [], index = 0, setIndex, ...props}) {
     return (
         <BackBoard>
             {list.map((value, idx) => (
-                <EmptyRoundBtn onClick={() => setIndex(idx)}>
+                <EmptyRoundBtn key={idx} onClick={() => setIndex(idx)}>
                     {value}
                 </EmptyRoundBtn>
             ))}

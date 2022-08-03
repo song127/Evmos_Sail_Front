@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
-import {forwardRef, useEffect, useRef} from "react";
+import {forwardRef} from "react";
 import SizeBox from "../utils/blocks/SizeBox";
 
 const InputBoard = styled.div`
@@ -60,7 +60,7 @@ const TokenInput = forwardRef(({
                                    ...props
                                }, ref) =>
     <InputBoard state={state}>
-        <InputBody ref={ref} disabled={disabled} placeholder={holder} value={input} onChange={onChange}/>
+        <InputBody ref={ref} disabled={disabled} placeholder={holder} defaultValue={input} onChange={onChange}/>
         {btn !== undefined ?
             <>
                 {btn}

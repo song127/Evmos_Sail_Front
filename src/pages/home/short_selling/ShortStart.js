@@ -18,6 +18,9 @@ import BorderButton from "../../../components/global/BorderButton";
 import {useDispatch, useSelector} from "react-redux";
 import ActionsAPI from "../../../network/ActionsAPI";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
+import DoneModal from "../../../components/global/modals/Modals/DoneModal";
+import DataApi from "../../../network/DataApi";
+import {connect} from "../../../redux/blockchain/blockchainActions";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -74,10 +77,14 @@ const itemList = ['DAI'];
 
 const shorItemList = ['ETH'];
 
-function ShortStart({toastOn, setToastOn, setToastType, setToastContent}) {
+function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadingModal}) {
     const blockchain = useSelector(state => state.blockchain);
     const actionApi = new ActionsAPI();
+    const dataApi = new DataApi();
     const dispatch = useDispatch();
+
+    const [approveCount, setApproveCount] = useState(0);
+    const [approveLoading, setApproveLoading] = useState(true);
 
     // USER
     const [myBalance, setMyBalance] = useState(0.0);
@@ -114,66 +121,118 @@ function ShortStart({toastOn, setToastOn, setToastType, setToastContent}) {
     const [gasFee, setGasFee] = useState(0);
     const [apy, setApy] = useState(0);
 
-    const shortStartHandler = async () => {
-        await actionApi.approveToken(blockchain).then((result) => {
-            if (result === 0) {
-                actionApi.shortStartW(
-                    blockchain,
-                    collateralToken,
-                    shortToken,
-                    // slippageIndex,
-                ).then((result) => {
-                    if (result) {
-                        toastHandler();
-                    } else {
-                        alert('Short Start Failed');
-                    }
-                });
-            } else if (result === 1) {
-
-            } else {
-                alert('Fail');
-            }
-        });
+    const approveToBorrowEth = async () => {
+        setLoadingModal(true);
+        const result = await actionApi.approveBorrowEth(blockchain);
+        if (result) {
+            setApproveCount(1);
+            setTitle('Successfully Approve To Aave Borrow Contract');
+            setContent('Thank you bro!\n ');
+            setLink('/Short');
+            modalHandler();
+        } else {
+            setTitle('Approve To Aave Borrow Contract Failed');
+            setContent('Please Approve To Aave Borrow Contract Again\n ');
+            setLink(undefined);
+            modalHandler();
+        }
+        setLoadingModal(false);
     }
 
-    const toastHandler = () => {
-        if (toastOn) {
-            setToastOn(false);
-            setTimeout(() => {
-                setToastOn(true);
-                setToastType(MESSAGE_TYPES.COMPLETE);
-                setToastContent(<SuccessMessageContent
-                    type={CompleteTypes.SHORT_START}
-                    close={setToastOn}/>);
-            }, 10);
+    const approveToAavePool = async () => {
+        setLoadingModal(true);
+        const result = await actionApi.approveTokenAave(blockchain);
+        if (result) {
+            setApproveCount(2);
+            setTitle('Successfully Approve To Aave Pool Contract');
+            setContent('Thank you bro!\n');
+            setLink('/Short');
+            modalHandler();
         } else {
-            setToastOn(true);
-            setToastType(MESSAGE_TYPES.COMPLETE);
-            setToastContent(<SuccessMessageContent
-                type={CompleteTypes.SHORT_START}
-                close={setToastOn}/>);
+            setTitle('Approve To Aave Pool Contract Failed');
+            setContent('Please Approve To Aave Pool Contract Again\n');
+            setLink(undefined);
+            modalHandler();
         }
+        setLoadingModal(false);
+    }
+
+    const approveToUniSwap = async () => {
+        setLoadingModal(true);
+        const result = await actionApi.approveTokenUniSwap(blockchain);
+        if (result) {
+            setApproveCount(3);
+            setTitle('Successfully Approve To UniSwap Contract');
+            setContent('Thank you bro!\n');
+            setLink('/Short');
+            modalHandler();
+        } else {
+            setTitle('Approve To UniSwap Contract Failed');
+            setContent('Please Approve To UniSwap Contract Again\n');
+            setLink(undefined);
+            modalHandler();
+        }
+        setLoadingModal(false);
+    }
+
+    const shortStartHandler = async () => {
+        setLoadingModal(true);
+        const result = await actionApi.shortStartW(blockchain, collateralToken, shortToken);
+        if (result) {
+            setTitle('Successfully completed Short start');
+            setContent('Short Start requirement has been sent to our server successfully.\n' +
+                'Good to go, bro!');
+            setLink('/Short');
+            modalHandler();
+            await getDatas();
+        } else {
+            setTitle('Short Start Failed');
+            setContent('Please short start again\n');
+            setLink(undefined);
+            modalHandler();
+        }
+        setLoadingModal(false);
+    }
+
+    const modalHandler = () => {
+        setModal(true);
+        setType(CompleteTypes.SHORT_START);
     }
 
     // GetDatas
     const getDatas = async () => {
-        if(blockchain.account) {
-            const balance = await actionApi.getMyDaiBalance(blockchain);
-            setMyBalance(balance);
+        if (blockchain.account) {
+            const myBalance = await dataApi.getDepositDaiBalance(blockchain);
+            setMyBalance(myBalance);
+            setNowDaiBalance(0.091);
+            setApy(27.4);
+            setGasFee(0.003452);
         }
-        setNowDaiBalance(0.091);
-        setApy(27.4);
-        setGasFee(0.003452);
     }
 
     useEffect(async () => {
-        if(blockchain.smartContract) {
+        if (blockchain.account) {
             await getDatas();
         }
     }, [blockchain]);
 
-    useLayoutEffect(() => {
+    useEffect(async () => {
+        if (blockchain.account) {
+            setApproveLoading(true);
+            if (await dataApi.isApprovedBorrowEth(blockchain)) {
+                setApproveCount(1);
+            }
+            if (await dataApi.isApprovedAavePool(blockchain)) {
+                setApproveCount(2);
+            }
+            if (await dataApi.isApprovedUniSwap(blockchain)) {
+                setApproveCount(3);
+            }
+            setApproveLoading(false);
+        }
+    }, [blockchain]);
+
+    useEffect(async () => {
         dispatch({type: DATA_TYPES.MENU, data: 'short'})
     }, []);
 
@@ -299,11 +358,44 @@ function ShortStart({toastOn, setToastOn, setToastType, setToastContent}) {
 
                     <SizeBox h={48}/>
                     <SizeBox w={'100%'} h={60}>
-                        <BasicSquareBtn
-                            active={true}
-                            onClick={() => shortStartHandler()}>
-                            short start
-                        </BasicSquareBtn>
+                        {
+                            approveLoading ?
+                                <BasicSquareBtn
+                                    active={true}
+                                    onClick={() => {}}>
+                                    Loading
+                                </BasicSquareBtn> :
+                                <>
+                                    {approveCount === 0 && blockchain.account ?
+                                        <BasicSquareBtn
+                                            active={true}
+                                            onClick={() => approveToBorrowEth()}>
+                                            Approve Eth To Borrow
+                                        </BasicSquareBtn> : null
+                                    }
+                                    {approveCount === 1 && blockchain.account ?
+                                        <BasicSquareBtn
+                                            active={true}
+                                            onClick={() => approveToAavePool()}>
+                                            Approve Token
+                                        </BasicSquareBtn> : null
+                                    }
+                                    {approveCount === 2 && blockchain.account ?
+                                        <BasicSquareBtn
+                                            active={true}
+                                            onClick={() => approveToUniSwap()}>
+                                            Approve Token To UniSwap
+                                        </BasicSquareBtn> : null
+                                    }
+                                    {approveCount === 3 && blockchain.account ?
+                                        <BasicSquareBtn
+                                            active={true}
+                                            onClick={() => shortStartHandler()}>
+                                            short start
+                                        </BasicSquareBtn> : null
+                                    }
+                                </>
+                        }
                     </SizeBox>
                 </Backboard_1>
 

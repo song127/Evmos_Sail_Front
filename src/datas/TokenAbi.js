@@ -203,4 +203,12 @@ export const TokenAbi = [{
     }, {"indexed": false, "name": "tokens", "type": "uint256"}],
     "name": "Approval",
     "type": "event"
-}];
+}, {
+    "constant": true,
+    "inputs": [{"name": "tokenOwner", "type": "address"}, {"name": "spender", "type": "address"}],
+    "name": "borrowAllowance",
+    "outputs": [{"name": "remaining", "type": "uint256"}],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+},];

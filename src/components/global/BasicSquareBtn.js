@@ -32,7 +32,7 @@ const Container = styled.button`
 
 function BasicSquareBtn({active = false, onClick, ...props}) {
     return (
-        <Container active={active} onClick={onClick}>
+        <Container active={active.toString()} onClick={onClick}>
             {props.children}
         </Container>
     );

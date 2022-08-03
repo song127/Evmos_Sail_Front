@@ -1,22 +1,23 @@
 import "./App.css";
-import React, {useEffect, useState, useRef} from "react";
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import React from "react";
+import {Route, Routes} from "react-router-dom";
 import styled from "styled-components";
-import {useDispatch, useSelector} from "react-redux";
-import {connect} from "./redux/blockchain/blockchainActions";
+import {useSelector} from "react-redux";
 import ScrollToTop from "./components/utils/actions/ScrollTop";
 import Header from "./components/global/header";
 import DepositAndWithdraw from "./pages/home/deposit_and_withdraw";
 import ShortSelling from "./pages/home/short_selling";
 import CurrentAsset from "./pages/home/current_asset";
 import CheckConnect from "./components/utils/actions/CheckConnect";
-import ConnectWallet from "./pages/home/ConnectWallet";
+import ConnectWallet from "./pages/ConnectWallet";
+import Loading from "./pages/Loading";
 
 const BodyInner = styled.div`
   display: flex;
   justify-content: center;
 
   width: 100%;
+  height: 100%;
 `;
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
                 <CheckConnect/>
                 {headerOn ? <Header/> : null}
                 <Routes>
+                    <Route path={''} element={<Loading/>}/>
                     <Route path={'/Connect'} element={<ConnectWallet/>}/>
                     <Route path={'/Transaction'} element={<DepositAndWithdraw/>}/>
                     <Route path={'/Short'} element={<ShortSelling/>}/>
