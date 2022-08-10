@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
 
 const Container = styled.button`
+  pointer-events: ${props => props.active ? 'all' : 'none'};
   cursor: pointer;
 
   display: flex;
@@ -31,10 +32,10 @@ const Container = styled.button`
 const BtnSetting = { // border, font, back
     0: {
         true: [c.blue_2, c.white, c.blue_2],
-        false: [c.blue_1, c.white, c.blue_1],
+        false: [c.blue_2, c.white, c.blue_2],
     },
     1: {
-        true: [c.blue_1, c.blue_1, c.white],
+        true: [c.blue_2, c.blue_2, c.white],
         false: [c.light_gray, c.light_gray, c.white],
     }
 }
@@ -45,9 +46,9 @@ function SquareBtn({type = 0, active = false, onClick, ...props}) {
     const bColor = BtnSetting[type][active][0];
     const font = BtnSetting[type][active][1];
     const back = BtnSetting[type][active][2];
-    const opacity = active ? null : 0.2;
+    const opacity = active ? null : 0.6;
     return (
-        <Container bColor={bColor} font={font} back={back} onClick={onClicked} opacity={opacity}>
+        <Container active={active} bColor={bColor} font={font} back={back} onClick={onClicked} opacity={opacity}>
             {props.children}
         </Container>
     );

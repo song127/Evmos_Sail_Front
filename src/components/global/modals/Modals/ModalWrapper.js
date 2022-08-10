@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import {COLORS as c} from "../../../../styles/colors";
 
 const Temp = styled.div`
     position: absolute;
@@ -15,7 +16,8 @@ const Container = styled.div`
   height: 100%;
   
   left: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  top: 0;
+  background-color: ${c.modal_back};
   
   z-index: 1300;
   overflow: hidden;

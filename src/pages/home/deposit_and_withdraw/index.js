@@ -5,7 +5,7 @@ import {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import RoundTab from "../../../components/global/RoundTab";
 import SizeBox from "../../../components/utils/blocks/SizeBox";
-import {ContentLoaded} from "../../../components/utils/actions/ContentLoaded";
+import {ContentLoaded} from "../../../components/utils/actions/Animations";
 import Selector from "../../../components/global/Selector";
 import TokenInput, {TOKEN_INPUT_STATE} from "../../../components/global/TokenInput";
 import BasicSquareBtn from "../../../components/global/BasicSquareBtn";
@@ -19,6 +19,7 @@ import DataApi from "../../../network/DataApi";
 import Loading from "../../Loading";
 import actionsAPI from "../../../network/ActionsAPI";
 import LoadingModal from "../../../components/global/modals/Modals/LoadingModal";
+import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 
 const Container = styled.div`
   display: flex;
@@ -46,6 +47,19 @@ const Box = styled.div`
   padding-right: 58px;
 `;
 
+const Token = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 110px;
+  height: 50px;
+
+  font-weight: 400;
+  font-family: Montserrat;
+  font-size: 16px;
+`;
+
 const itemList = [
     'DAI',
 ]
@@ -70,7 +84,8 @@ function DepositAndWithdraw() {
 
     const [loading, setLoading] = useState(true);
 
-    const [approved, setApproved] = useState(true);
+    const [approved, setApproved] = useState(false);
+    const [isValid, setIsValid] = useState(false);
 
     const approveToken = async () => {
         setLoadingModal(true);
@@ -82,7 +97,6 @@ function DepositAndWithdraw() {
     }
 
     const [tabIndex, setTabIndex] = useState(0);
-    const [inputTokenIndex, setInputTokenIndex] = useState(0);
 
     const [availableDAI, setAvailableDAI] = useState(100);
     const [myBalance, setMyBalance] = useState(0);
@@ -157,7 +171,6 @@ function DepositAndWithdraw() {
         if (blockchain.account) {
             const balance = await dataApi.getMyDaiBalance(blockchain);
             const myBalance = await dataApi.getDepositDaiBalance(blockchain);
-            await dataApi.getTest(blockchain);
             setAvailableDAI(balance);
             setMyBalance(myBalance);
 
@@ -169,13 +182,21 @@ function DepositAndWithdraw() {
     }
 
     useEffect(() => {
+        if(actionApi.checkNumber(inputToken)) {
+            setIsValid(true);
+        } else {
+            setIsValid(false);
+        }
+    }, [inputToken]);
+
+    useEffect(() => {
         setInputToken('');
     }, [tabIndex]);
 
     useEffect(async () => {
         dispatch({type: DATA_TYPES.MENU, data: 'transaction'});
         await getDatas();
-    }, []);
+    }, [blockchain.account]);
 
     return (
         <>{loading ? <Loading/> : <>
@@ -201,11 +222,7 @@ function DepositAndWithdraw() {
                             ref={inputTokenRef} input={inputToken} disabled={false}
                             state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
                             onChange={inputTokenOnchange}
-                            btn={
-                                <SizeBox w={150} h={60}>
-                                    <Selector list={itemList} index={inputTokenIndex}
-                                              setIndex={setInputTokenIndex}/>
-                                </SizeBox>}/>
+                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
                     </SizeBox>
 
                     <SizeBox h={44}/>
@@ -228,7 +245,7 @@ function DepositAndWithdraw() {
                     <SizeBox h={84}/>
                     {approved || tabIndex == 1 ?
                         <SizeBox w={'100%'} h={60}>
-                            <BasicSquareBtn active={true}
+                            <BasicSquareBtn active={isValid}
                                             onClick={async () => {
                                                 if (tabIndex === 0) {
                                                     await depositHandler();

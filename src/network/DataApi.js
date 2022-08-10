@@ -2,40 +2,23 @@
 import {TokenAbi} from "../datas/TokenAbi";
 import {TokenAddress} from "../datas/Address";
 import ConnectorProvider from "./ConnectorProvider";
-import SubWallet from "../datas/contracts/SubWallet.json";
+import Web3 from "web3";
+const web3G = new Web3();
 
 class DataApi {
-    getTest = async (blockchain) => {
-        const web3 = blockchain.web3;
-        const account = blockchain.account;
-        const sub = await new DataApi().getSubWallet(blockchain)
-
-        const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
-
-        const v = web3.utils.toHex(web3.utils.toWei('0.00001'));
-
-        // await contract.methods.tokenToEth(TokenAddress.DAI, v).send(
-        //     {from: account, gas: 500000}
-        // )
-
-        const value = await contract.methods.getShort(sub).call(
-            {from: account}
-        );
-
-        console.log(value);
-    }
-
+    // Wallet Data
+    //--------------------------------------------------------------------------------------
     getSubWallet = async (blockchain) => {
         const connector = new ConnectorProvider().factoryConnector(blockchain);
 
         const wallets = await connector.methods.getWallets(blockchain.account).call(
             {from: blockchain.account},
-            (err, hs) => {
+            (err,) => {
                 if (err) throw err;
             }
         );
 
-        if (wallets.length == 0) {
+        if (wallets.length === 0) {
             return 'false';
         }
 
@@ -55,7 +38,7 @@ class DataApi {
 
         const balance = await tokenContractObj.methods.balanceOf(account).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             }
         );
@@ -82,7 +65,7 @@ class DataApi {
 
         const balance = await tokenContractObj.methods.balanceOf(sub).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             }
         );
@@ -101,17 +84,12 @@ class DataApi {
 
         const contract = await new ConnectorProvider().tokenConnector(web3);
 
-        // set address
-        const networkId = await window.ethereum.request({
-            method: "net_version",
-        });
-
         const balance = await contract.methods.allowance(
             account,
             sub
         ).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             });
 
@@ -135,12 +113,11 @@ class DataApi {
 
         const balance = await tokenContractObj.methods.borrowAllowance(sub, TokenAddress.AAVE_GATEWAY).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             }
         );
         const result = balance / web3.utils.toBN(10).pow(web3.utils.toBN(18));
-        console.log('ETH : ' + result);
 
         return result > 20000;
     }
@@ -149,6 +126,9 @@ class DataApi {
         const web3 = blockchain.web3;
         const account = blockchain.account;
         const sub = await this.getSubWallet(blockchain);
+        if(sub === 'false') {
+            return false;
+        }
         const tokenAbi = TokenAbi;
 
         const tokenContractObj = new web3.eth.Contract(
@@ -158,13 +138,11 @@ class DataApi {
 
         const balance = await tokenContractObj.methods.allowance(sub, TokenAddress.AAVE_LENDING_POOL).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             }
         );
         const result = parseInt(balance);
-
-        console.log('Pool : ' + result);
 
         return result > 20000;
     }
@@ -182,14 +160,103 @@ class DataApi {
 
         const balance = await tokenContractObj.methods.allowance(sub, TokenAddress.UNI_SWAP).call(
             {from: account},
-            function (error, txnHash) {
+            function (error,) {
                 if (error) throw error;
             }
         );
         const result = parseInt(balance);
-        console.log('Uni : ' + result);
 
         return result > 20000;
+    }
+
+    getShortData = async (blockchain) => {
+        const account = blockchain.account;
+        const sub = await new DataApi().getSubWallet(blockchain)
+
+        const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
+
+        const value = await contract.methods.getShort(sub).call(
+            {from: account}
+        );
+
+        return value;
+    }
+
+    getCollateralData = async (blockchain) => {
+        const account = blockchain.account;
+        const sub = await new DataApi().getSubWallet(blockchain)
+
+        const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
+
+        const value = await contract.methods.getCollateral(TokenAddress.DAI).call(
+            {from: account}
+        );
+        const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+
+        return result;
+    }
+
+    // External Data
+    //--------------------------------------------------------------------------------------
+    getHealth = async (blockchain) => {
+        const account = blockchain.account;
+        const sub = await new DataApi().getSubWallet(blockchain);
+        const contract = await new ConnectorProvider().aaveConnector(blockchain);
+
+        const value = await contract.methods.getUserAccountData(sub).call(
+            {from: account}
+        );
+        console.log(value);
+
+        return value;
+    }
+
+    getWEthPath = async (blockchain) => {
+        const account = blockchain.account;
+        const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
+
+        const value = await contract.methods.WETH().call(
+            {from: account}
+        );
+
+        return value;
+    }
+
+    getDaiEthRate = async (blockchain, mode) => { // 0: DAI > ETH // 1: ETH > DAI
+        const account = blockchain.account;
+        const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
+        const wEthPath = await this.getWEthPath(blockchain);
+
+        const amount = web3G.utils.toHex(web3G.utils.toWei('1'));
+        let value;
+        if(mode === 0) {
+            const path = [TokenAddress.DAI, wEthPath];
+            value = await contract.methods.getAmountsOut(amount, path).call(
+                {from: account}
+            );
+        } else {
+            const path = [wEthPath, TokenAddress.DAI];
+            value = await contract.methods.getAmountsOut(amount, path).call(
+                {from: account}
+            );
+        }
+
+        const result = value[1] / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+
+        return result;
+    }
+
+    getTokensRate = async (token1, token2, blockchain) => {
+        const account = blockchain.account;
+        const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
+
+        const value = await contract.methods.getAmountsOut().call(
+            {from: account}
+        );
+
+        const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+
+        return result;
     }
 }
 

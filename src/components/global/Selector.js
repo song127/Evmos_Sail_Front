@@ -4,6 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import {ReactComponent as DownArrow} from "../../assets/icons/icon-down-arrow.svg";
 import Spacer from "../utils/blocks/Spacer";
 import SizeBox from "../utils/blocks/SizeBox";
+import {ReactComponent as ETH} from "../../assets/icons/tokens/icon-eth.svg";
 
 const Container = styled.div`
   pointer-events: ${p => p.disable ? 'none' : 'auto'};
@@ -78,10 +79,14 @@ const OptionWrapper = styled.div`
 
 const OptionItem = styled.div`
   cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  flex-direction: row;
 
   width: calc(100%);
   height: 43px;
-  padding-left: 13px;
+  padding-left: 16px;
   background-color: ${props => props.selected ? c.gray_4 : 'transparent'};
 
   line-height: 43px;
@@ -119,6 +124,8 @@ function Selector({list, index = 0, setIndex, disable = false, ...props}) {
     return (
         <Container ref={ref} disable={disable}>
             <SelectedValue ref={ref} onClick={() => setActive(!active)}>
+                {list[index] === 'ETH' ? <ETH/> : null}
+                <SizeBox w={10}/>
                 {list[index]}
                 <Spacer/>
                 <DownArrowC active={active}/>
@@ -127,6 +134,8 @@ function Selector({list, index = 0, setIndex, disable = false, ...props}) {
             <OptionWrapper active={active}>
                 {list.map((value, idx) => (
                     <OptionItem key={idx} selected={index === idx} onClick={() => setIndex(idx)}>
+                        {value === 'ETH' ? <ETH/> : null}
+                        <SizeBox w={10}/>
                         {value}
                     </OptionItem>
                 ))}

@@ -3,7 +3,7 @@ import {COLORS as c} from "../../../styles/colors";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useLayoutEffect, useState, useRef} from "react";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
-import {ContentLoaded} from "../../../components/utils/actions/ContentLoaded";
+import {ContentLoaded} from "../../../components/utils/actions/Animations";
 import RoundTab from "../../../components/global/RoundTab";
 import SizeBox from "../../../components/utils/blocks/SizeBox";
 import {useMediaQuery} from "react-responsive";
@@ -49,10 +49,10 @@ export const ModalOptions = [
         name: 'Go to Short'
     },
     {
-        name: ''
+        name: 'Confirm'
     },
     {
-        name: ''
+        name: 'Confirm'
     },
     {
         name: 'Go to Asset'
@@ -66,6 +66,8 @@ function ShortSelling() {
     const dispatch = useDispatch();
     const tab = useSelector(state => state.data.tab);
     const [tabIndex, setTabIndex] = useState(0);
+
+    const [loading, setLoading] = useState(true);
 
     const [modal, setModal] = useState(false);
     const [title, setTitle] = useState('');
@@ -84,6 +86,7 @@ function ShortSelling() {
 
     useEffect(() => {
         dispatch({type: DATA_TYPES.TAB, data: tabIndex});
+        setLoading(true);
     }, [tabIndex]);
 
     useEffect(() => {
@@ -94,21 +97,37 @@ function ShortSelling() {
         <>
             {loadingModal ? <LoadingModal/> : null}
             {modal ? <DoneModal title={title} content={content} link={link} setModal={setModal} type={type}/> : null}
-            <Container>
-                <SizeBox h={160}/>
-                <SizeBox w={520}>
-                    <RoundTab list={tabList} index={tabIndex} setIndex={setTabIndex}/>
-                </SizeBox>
+            <Visibility visibility={!loading}>
+                <Container>
+                    <SizeBox h={160}/>
+                    <SizeBox w={520}>
+                        <RoundTab list={tabList} index={tabIndex} setIndex={setTabIndex}/>
+                    </SizeBox>
 
-                <Visibility visibility={tabIndex === 0}>
-                    <ShortStart setTitle={setTitle} setContent={setContent} setLink={setLink} setModal={setModal} setType={setType} setLoadingModal={setLoadingModal}/>
-                </Visibility>
-                <Visibility visibility={tabIndex === 1}>
-                    <ShortEnd setTitle={setTitle} setContent={setContent} setLink={setLink} setModal={setModal} setType={setType} setLoadingModal={setLoadingModal}/>
-                </Visibility>
-
-                <SizeBox h={120}/>
-            </Container>
+                    <Visibility visibility={tabIndex === 0 && !loading}>
+                        <ShortStart setLoading={setLoading}
+                                    setTitle={setTitle}
+                                    setContent={setContent}
+                                    setLink={setLink}
+                                    setModal={setModal}
+                                    setType={setType}
+                                    setLoadingModal={setLoadingModal}/>
+                    </Visibility>
+                    <Visibility visibility={tabIndex === 1 && !loading}>
+                        <ShortEnd setLoading={setLoading}
+                                  setTitle={setTitle}
+                                  setContent={setContent}
+                                  setLink={setLink}
+                                  setModal={setModal}
+                                  setType={setType}
+                                  setLoadingModal={setLoadingModal}/>
+                    </Visibility>
+                    <SizeBox h={120}/>
+                </Container>
+            </Visibility>
+            <Visibility visibility={loading}>
+                <Loading/>
+            </Visibility>
         </>
     );
 }

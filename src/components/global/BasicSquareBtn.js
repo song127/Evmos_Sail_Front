@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
 
 const Container = styled.button`
+  pointer-events: ${props => props.active ? 'all' : 'none'};
   cursor: ${props => props.active ? 'pointer' : null};
 
   display: flex;
@@ -32,7 +33,7 @@ const Container = styled.button`
 
 function BasicSquareBtn({active = false, onClick, ...props}) {
     return (
-        <Container active={active.toString()} onClick={onClick}>
+        <Container active={active} onClick={onClick}>
             {props.children}
         </Container>
     );

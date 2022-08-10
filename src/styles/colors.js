@@ -5,10 +5,11 @@ export const COLORS = {
     black: '#222222',
     light_black: '#444444',
     gray: '#777777',
-    light_gray: '#CCCCCC',
+    light_gray: '#E9E9EE',
     gray_3: '#9292AA',
     gray_4: '#ebebf1',
     font_color: '#2F2F36',
+    modal_back : 'rgba(47, 47, 54, 0.7)',
 
     background: '#F6F7FC',
 

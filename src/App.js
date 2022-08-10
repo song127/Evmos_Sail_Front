@@ -15,20 +15,18 @@ import Loading from "./pages/Loading";
 const BodyInner = styled.div`
   display: flex;
   justify-content: center;
+  align-items: center;
 
   width: 100%;
-  height: 100%;
 `;
 
 function App() {
-    const headerOn = useSelector((state) => state.data.header);
-
     return (
         <>
             <BodyInner>
                 <ScrollToTop/>
                 <CheckConnect/>
-                {headerOn ? <Header/> : null}
+                <Header/>
                 <Routes>
                     <Route path={''} element={<Loading/>}/>
                     <Route path={'/Connect'} element={<ConnectWallet/>}/>
@@ -40,32 +38,5 @@ function App() {
         </>
     );
 }
-
-// <s.Screen>
-//   {blockchain.account === "" || blockchain.smartContract === null ? (
-//       <s.Container flex={1} ai={"center"} jc={"center"}>
-//         <s.TextTitle>Connect to the Blockchain</s.TextTitle>
-//         <s.SpacerSmall />
-//         <StyledButton
-//             onClick={(e) => {
-//               e.preventDefault();
-//               dispatch(connect());
-//             }}
-//         >
-//           CONNECT
-//         </StyledButton>
-//         <s.SpacerSmall />
-//         {blockchain.errorMsg !== "" ? (
-//             <s.TextDescription>{blockchain.errorMsg}</s.TextDescription>
-//         ) : null}
-//       </s.Container>
-//   ) : (
-//       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
-//         <s.TextTitle style={{ textAlign: "center" }}>
-//           Name: {data.name}.
-//         </s.TextTitle>
-//       </s.Container>
-//   )}
-// </s.Screen>
 
 export default App;

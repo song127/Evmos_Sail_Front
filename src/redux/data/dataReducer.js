@@ -9,7 +9,7 @@ export const DATA_TYPES = {
 
 const initialState = {
   header: false,
-  menu: 'short',
+  menu: '',
   tab: 0,
   loading: false,
 };

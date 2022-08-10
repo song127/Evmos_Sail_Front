@@ -1,15 +1,14 @@
 import Factory from '../datas/contracts/SubWalletFactory.json';
 import SubWallet from '../datas/contracts/SubWallet.json';
-import {TokenAbi} from "../datas/TokenAbi";
+import UniSwap from "../datas/contracts/UniswapV2Router.json";
+import {AavePoolAbi, TokenAbi} from "../datas/TokenAbi";
 import {TokenAddress} from "../datas/Address";
 
 class ConnectorProvider {
     factoryConnector = (blockchain) => {
         const web3 = blockchain.web3;
-        const account = blockchain.account;
 
         const abi = Factory.abi;
-        // Create contract object
         const ContractObj = new web3.eth.Contract(
             abi,
             Factory.networks["42"].address
@@ -31,23 +30,41 @@ class ConnectorProvider {
     }
 
     tokenConnector = (web3) => {
-        // Get the contract ABI from compiled smart contract json
-        const tokenAbi = TokenAbi;
-        // Create contract object
+        const abi = TokenAbi;
         const tokenContractObj = new web3.eth.Contract(
-            tokenAbi,
+            abi,
             TokenAddress.DAI
         );
 
         return tokenContractObj;
     }
 
+    uniSwapConnector = (blockchain) => {
+        const web3 = blockchain.web3;
+
+        const abi = UniSwap.abi;
+        const ContractObj = new web3.eth.Contract(
+            abi,
+            TokenAddress.UNI_SWAP
+        );
+
+        return ContractObj;
+    }
+
     aaveETHConnector = () => {
 
     }
 
-    aaveConnector = () => {
+    aaveConnector = (blockchain) => {
+        const web3 = blockchain.web3;
 
+        const abi = AavePoolAbi;
+        const Contract = new web3.eth.Contract(
+            abi,
+            TokenAddress.AAVE_LENDING_POOL
+        );
+
+        return Contract;
     }
 }
 

@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
-import { Slider } from '@mui/material';
+import {Slider, SliderThumb} from '@mui/material';
 import SizeBox from "../utils/blocks/SizeBox";
 
 const BackBoard = styled.div`
   display: flex;
   align-items: center;
   justify-content: start;
-  
+
   width: 100%;
   height: 16px;
   padding-left: 8px;
@@ -17,14 +17,14 @@ const BackBoard = styled.div`
   background: linear-gradient(270deg, #FF6262 0%, #F9CC8A 51.04%, #69CAA1 100%);
 `;
 
-function PercentBar({step, min = 0, max = 70, value, onChange, ...props}) {
+function PercentBar({step, min = 0, max = 50, value, onChange, ...props}) {
     return (
         <BackBoard>
-            <SizeBox w={'65%'}>
+            <SizeBox w={'50%'}>
                 <SizeBox h={2.5}/>
                 <Slider aria-label={'Volume'} value={value}
                         onChange={(e, v) => onChange(v)}
-                        defaultValue={0} min={min} max={70}
+                        defaultValue={0} min={min} max={50}
                         step={1}
                         sx={{
                             backgroundColor: 'transparent',
@@ -36,16 +36,16 @@ function PercentBar({step, min = 0, max = 70, value, onChange, ...props}) {
                                 backgroundColor: c.black,
                                 boxShadow: 'none',
                             },
-                            '& .MuiSlider-rail' : {
+                            '& .MuiSlider-rail': {
                                 backgroundColor: 'transparent'
                             },
-                            '& .MuiSlider-track' : {
+                            '& .MuiSlider-track': {
                                 border: 'none',
                                 backgroundColor: 'transparent'
                             }
                         }}
-
                 />
+
             </SizeBox>
         </BackBoard>
     );

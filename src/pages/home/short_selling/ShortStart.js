@@ -6,21 +6,19 @@ import BasicSquareBtn from "../../../components/global/BasicSquareBtn";
 import PercentBar from "../../../components/global/PercentBar";
 import styled from "styled-components";
 import {COLORS as c} from "../../../styles/colors";
-import {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
 import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 import {ReactComponent as Heart} from "../../../assets/icons/icon-green_heart.svg";
 import {ReactComponent as Gas} from "../../../assets/icons/icon-gas-station.svg";
-import {CompleteTypes, ToastOptions} from "./index";
-import ConfirmBtn from "../../../components/global/ConfirmBtn";
-import {useNavigate} from "react-router-dom";
-import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
+import {ReactComponent as LT} from "../../../assets/images/image-LT.svg";
+import {ReactComponent as MaxLTV} from "../../../assets/images/image-max_ltv.svg";
+import {CompleteTypes} from "./index";
 import BorderButton from "../../../components/global/BorderButton";
 import {useDispatch, useSelector} from "react-redux";
 import ActionsAPI from "../../../network/ActionsAPI";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
-import DoneModal from "../../../components/global/modals/Modals/DoneModal";
 import DataApi from "../../../network/DataApi";
-import {connect} from "../../../redux/blockchain/blockchainActions";
+import ToolTip from "../../../components/global/ToolTip";
+import {TokenAddress} from "../../../datas/Address";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -54,7 +52,12 @@ const Backboard_2 = styled.div`
 `;
 
 const Title = styled.div`
-  width: max-content;
+  display: flex;
+  flex-direction: row;
+
+  white-space: nowrap;
+
+  width: 100%;
   height: max-content;
 
   color: ${c.font_color};
@@ -64,6 +67,8 @@ const Title = styled.div`
 `;
 
 const SubTitle = styled.div`
+  cursor: pointer;
+
   width: max-content;
   height: max-content;
 
@@ -73,42 +78,96 @@ const SubTitle = styled.div`
   font-weight: 500;
 `;
 
-const itemList = ['DAI'];
+const Token = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 110px;
+  height: 50px;
+
+  font-weight: 400;
+  font-family: Montserrat;
+  font-size: 16px;
+`;
+
+const LTImg = styled(LT)`
+  position: absolute;
+
+  top: 300px;
+  right: 60px;
+`;
+
+const LTVImg = styled(MaxLTV)`
+  position: absolute;
+
+  top: 410px;
+  right: 213px;
+`;
+
+const PerBorder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 60px;
+  height: 40px;
+  background-color: ${c.font_color};
+  border-radius: 8px;
+
+  color: ${c.white};
+`;
+
+// const itemList = ['DAI'];
 
 const shorItemList = ['ETH'];
 
-function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadingModal}) {
+function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setType, setLoadingModal}) {
     const blockchain = useSelector(state => state.blockchain);
     const actionApi = new ActionsAPI();
     const dataApi = new DataApi();
     const dispatch = useDispatch();
+
+    const [isValid, setIsValid] = useState(false);
 
     const [approveCount, setApproveCount] = useState(0);
     const [approveLoading, setApproveLoading] = useState(true);
 
     // USER
     const [myBalance, setMyBalance] = useState(0.0);
-    const [nowDaiBalance, setNowDaiBalance] = useState(0.091);
 
-    const [collateralTokenIndex, setCollateralTokenIndex] = useState(0);
+    // Collateral
+    const [ratioValue, setRatioValue] = useState(0);
     const collateralTokenRef = useRef(null);
     const [collateralToken, setCollateralToken] = useState('');
     const collateralTokenOnchange = (e) => {
         setCollateralToken(e.target.value);
     }
     const macroHandler = (value) => {
+        setRatioValue(value);
         const collateralBalance = (myBalance * value / 100).toString();
         setCollateralToken(collateralBalance);
     }
 
+    useEffect(() => {
+        if (actionApi.checkNumber(collateralToken)) {
+            const ratio = parseFloat(collateralToken) * 100 / myBalance;
+            setRatioValue(ratio);
+        }
+    }, [collateralToken]);
+
+    // Short
     const [shortTokenIndex, setShortTokenIndex] = useState(0);
     const shortTokenRef = useRef(null);
     const [shortToken, setShortToken] = useState('');
     const shortTokenOnchange = (e) => {
-        setShortToken(e.target.value);
+        if (e.target.value.length < 16) {
+            setShortToken(e.target.value);
+        }
     }
 
-    const [apyIndex, setApyIndex] = useState(0);
+    // ETC
+    // const [apyIndex, setApyIndex] = useState(0);
     const [slippageIndex, setSlippageIndex] = useState(0);
 
     const [barValue, setBarValue] = useState(0);
@@ -116,14 +175,46 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
         setBarValue(value);
     }
 
+    useEffect(() => {
+        const data = (parseFloat(collateralToken) * daiPrice * barValue / 100).toString();
+        if (data !== 'NaN') {
+            const fixed = parseFloat(data).toFixed(14).toString();
+            setShortToken(fixed);
+        } else {
+            setShortToken('');
+        }
+    }, [collateralToken]);
+
+    useEffect(() => {
+        const data = (parseFloat(collateralToken) * daiPrice * barValue / 100).toString();
+        if (data !== 'NaN') {
+            const fixed = parseFloat(data).toFixed(14).toString();
+            setShortToken(fixed);
+        } else {
+            setShortToken('');
+        }
+    }, [barValue]);
+
+    const checkValid = () => {
+        const colValid = actionApi.checkNumber(collateralToken);
+        const shortValid = actionApi.checkNumber(shortToken);
+
+        return colValid && shortValid;
+    }
+
+    useEffect(() => {
+        setIsValid(checkValid());
+    }, [collateralToken, shortToken]);
+
+
     // datas
     const [healthFactor, setHealthFactor] = useState(0);
     const [gasFee, setGasFee] = useState(0);
     const [apy, setApy] = useState(0);
 
-    const approveToBorrowEth = async () => {
+    const multiApproveAll = async () => {
         setLoadingModal(true);
-        const result = await actionApi.approveBorrowEth(blockchain);
+        const result = await actionApi.multiApprove(blockchain, [TokenAddress.DAI]);
         if (result) {
             setApproveCount(1);
             setTitle('Successfully Approve To Aave Borrow Contract');
@@ -139,41 +230,59 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
         setLoadingModal(false);
     }
 
-    const approveToAavePool = async () => {
-        setLoadingModal(true);
-        const result = await actionApi.approveTokenAave(blockchain);
-        if (result) {
-            setApproveCount(2);
-            setTitle('Successfully Approve To Aave Pool Contract');
-            setContent('Thank you bro!\n');
-            setLink('/Short');
-            modalHandler();
-        } else {
-            setTitle('Approve To Aave Pool Contract Failed');
-            setContent('Please Approve To Aave Pool Contract Again\n');
-            setLink(undefined);
-            modalHandler();
-        }
-        setLoadingModal(false);
-    }
-
-    const approveToUniSwap = async () => {
-        setLoadingModal(true);
-        const result = await actionApi.approveTokenUniSwap(blockchain);
-        if (result) {
-            setApproveCount(3);
-            setTitle('Successfully Approve To UniSwap Contract');
-            setContent('Thank you bro!\n');
-            setLink('/Short');
-            modalHandler();
-        } else {
-            setTitle('Approve To UniSwap Contract Failed');
-            setContent('Please Approve To UniSwap Contract Again\n');
-            setLink(undefined);
-            modalHandler();
-        }
-        setLoadingModal(false);
-    }
+    // const approveToBorrowEth = async () => {
+    //     setLoadingModal(true);
+    //     const result = await actionApi.approveBorrowEth(blockchain);
+    //     if (result) {
+    //         setApproveCount(1);
+    //         setTitle('Successfully Approve To Aave Borrow Contract');
+    //         setContent('Thank you bro!\n ');
+    //         setLink('/Short');
+    //         modalHandler();
+    //     } else {
+    //         setTitle('Approve To Aave Borrow Contract Failed');
+    //         setContent('Please Approve To Aave Borrow Contract Again\n ');
+    //         setLink(undefined);
+    //         modalHandler();
+    //     }
+    //     setLoadingModal(false);
+    // }
+    //
+    // const approveToAavePool = async () => {
+    //     setLoadingModal(true);
+    //     const result = await actionApi.approveTokenAave(blockchain);
+    //     if (result) {
+    //         setApproveCount(2);
+    //         setTitle('Successfully Approve To Aave Pool Contract');
+    //         setContent('Thank you bro!\n');
+    //         setLink('/Short');
+    //         modalHandler();
+    //     } else {
+    //         setTitle('Approve To Aave Pool Contract Failed');
+    //         setContent('Please Approve To Aave Pool Contract Again\n');
+    //         setLink(undefined);
+    //         modalHandler();
+    //     }
+    //     setLoadingModal(false);
+    // }
+    //
+    // const approveToUniSwap = async () => {
+    //     setLoadingModal(true);
+    //     const result = await actionApi.approveTokenUniSwap(blockchain);
+    //     if (result) {
+    //         setApproveCount(3);
+    //         setTitle('Successfully Approve To UniSwap Contract');
+    //         setContent('Thank you bro!\n');
+    //         setLink('/Short');
+    //         modalHandler();
+    //     } else {
+    //         setTitle('Approve To UniSwap Contract Failed');
+    //         setContent('Please Approve To UniSwap Contract Again\n');
+    //         setLink(undefined);
+    //         modalHandler();
+    //     }
+    //     setLoadingModal(false);
+    // }
 
     const shortStartHandler = async () => {
         setLoadingModal(true);
@@ -182,9 +291,11 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
             setTitle('Successfully completed Short start');
             setContent('Short Start requirement has been sent to our server successfully.\n' +
                 'Good to go, bro!');
-            setLink('/Short');
+            setLink(undefined);
             modalHandler();
-            await getDatas();
+            await getDatas().then(() => {
+                setModal(false);
+            });
         } else {
             setTitle('Short Start Failed');
             setContent('Please short start again\n');
@@ -199,36 +310,59 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
         setType(CompleteTypes.SHORT_START);
     }
 
-    // GetDatas
-    const getDatas = async () => {
-        if (blockchain.account) {
-            const myBalance = await dataApi.getDepositDaiBalance(blockchain);
-            setMyBalance(myBalance);
-            setNowDaiBalance(0.091);
-            setApy(27.4);
-            setGasFee(0.003452);
-        }
+    const [priceIndex, setPriceIndex] = useState(1);
+    const [daiPrice, setDaiPrice] = useState(0.0);
+    const [ethPrice, setEthPrice] = useState(0.0);
+    const getPrice = async () => {
+        const daiP = await dataApi.getDaiEthRate(blockchain, 0);
+        const ethP = await dataApi.getDaiEthRate(blockchain, 1);
+        setDaiPrice(daiP);
+        setEthPrice(ethP);
+
+        setPriceIndex(priceIndex === 0 ? 1 : 0);
     }
 
-    useEffect(async () => {
+    // Default
+    const getDatas = async () => {
         if (blockchain.account) {
-            await getDatas();
-        }
-    }, [blockchain]);
+            const shorted = await dataApi.getShortData(blockchain);
+            const myBalance = await dataApi.getDepositDaiBalance(blockchain);
+            await getPrice();
+            const gasFeeData = parseFloat(await blockchain.web3.eth.getGasPrice());
+            const health = await dataApi.getHealth(blockchain);
+            // const totalBEth = health['totalCollateralETH'];
+            // const ltv = 8000;
+            // const debtEth = health['totalDebtETH'];
+            // const factor = totalBEth * ltv / debtEth;
+            // console.log(factor);
 
-    useEffect(async () => {
-        if (blockchain.account) {
+            setGasFee(
+                gasFeeData / blockchain.web3.utils.toBN(10)
+                    .pow(blockchain.web3.utils.toBN(9))
+            );
+            setMyBalance(myBalance);
+            setApy(27.4);
+            setHealthFactor(health['healthFactor'] / (10 ** 18));
+
             setApproveLoading(true);
             if (await dataApi.isApprovedBorrowEth(blockchain)) {
                 setApproveCount(1);
             }
             if (await dataApi.isApprovedAavePool(blockchain)) {
-                setApproveCount(2);
+                setApproveCount(1);
             }
             if (await dataApi.isApprovedUniSwap(blockchain)) {
                 setApproveCount(3);
             }
             setApproveLoading(false);
+        }
+    }
+
+    useEffect(async () => {
+        if (blockchain.account) {
+            await getDatas().then(() => {
+                setLoading(false);
+            });
         }
     }, [blockchain]);
 
@@ -260,22 +394,20 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
                             disabled={false}
                             state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
                             onChange={collateralTokenOnchange}
-                            btn={
-                                <SizeBox w={150} h={60}>
-                                    <Selector list={itemList} index={collateralTokenIndex}
-                                              setIndex={setCollateralTokenIndex}/>
-                                </SizeBox>}/>
+                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
                     </SizeBox>
 
                     <SizeBox h={30}/>
                     <div className={'f-row'}>
                         <BorderButton
+                            selected={ratioValue === 50}
                             onClick={() => macroHandler(50)}>
                             50%
                         </BorderButton>
 
                         <SizeBox w={18}/>
                         <BorderButton
+                            selected={ratioValue === 100}
                             onClick={() => macroHandler(100)}>
                             Max
                         </BorderButton>
@@ -288,8 +420,11 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
 
                     <SizeBox h={10}/>
                     <div className={'f-row a-end j-end'}>
-                        <SubTitle>
-                            1 DAI ≈ {nowDaiBalance.toFixed(3)} ETH
+                        <SubTitle onClick={getPrice}>
+                            {priceIndex === 0 ?
+                                `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
+                                `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
+                            }
                         </SubTitle>
                     </div>
 
@@ -309,35 +444,32 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
 
                     <SizeBox h={48}/>
                     <Title>
-                        APY
+                        APY (variable)
+                        <SizeBox w={5}/>
+                        <ToolTip title={'What is different btw stable and variable APY?'}>
+                            Stable act as a fixed rated in the short-term,
+                            but can be re-balanced in the long-term in response to
+                            changes in market conditions. The variable rate is the
+                            rate based on the offer and demand in our protocol.
+                            Also it will change over the time and could be optimal
+                            rate depending on market conditions.
+                        </ToolTip>
+                        <div className={'f-row a-end j-end'}>
+                            <SubTitle>
+                                27.4 %
+                            </SubTitle>
+                        </div>
                     </Title>
-
-                    <SizeBox h={8}/>
-                    <div className={'f-row a-end j-end'}>
-                        <SubTitle>
-                            27.4 %
-                        </SubTitle>
-                    </div>
-
-                    <SizeBox h={30}/>
-                    <div className={'f-row'}>
-                        <BorderButton
-                            selected={apyIndex === 0}
-                            onClick={() => setApyIndex(0)}>
-                            Stable
-                        </BorderButton>
-
-                        <SizeBox w={18}/>
-                        <BorderButton
-                            selected={apyIndex === 1}
-                            onClick={() => setApyIndex(1)}>
-                            Variable
-                        </BorderButton>
-                    </div>
 
                     <SizeBox h={48}/>
                     <Title>
                         Slippage Tolerance
+
+                        <SizeBox w={5}/>
+                        <ToolTip title={'Slippage Tolerance :'}>
+                            Your transaction will revert if the price
+                            changes unfavorably by more than this percentage.
+                        </ToolTip>
                     </Title>
 
                     <SizeBox h={30}/>
@@ -362,38 +494,30 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
                             approveLoading ?
                                 <BasicSquareBtn
                                     active={true}
-                                    onClick={() => {}}>
+                                    onClick={() => {
+                                    }}>
                                     Loading
                                 </BasicSquareBtn> :
                                 <>
-                                    {approveCount === 0 && blockchain.account ?
-                                        <BasicSquareBtn
-                                            active={true}
-                                            onClick={() => approveToBorrowEth()}>
-                                            Approve Eth To Borrow
-                                        </BasicSquareBtn> : null
-                                    }
-                                    {approveCount === 1 && blockchain.account ?
-                                        <BasicSquareBtn
-                                            active={true}
-                                            onClick={() => approveToAavePool()}>
-                                            Approve Token
-                                        </BasicSquareBtn> : null
-                                    }
-                                    {approveCount === 2 && blockchain.account ?
-                                        <BasicSquareBtn
-                                            active={true}
-                                            onClick={() => approveToUniSwap()}>
-                                            Approve Token To UniSwap
-                                        </BasicSquareBtn> : null
-                                    }
-                                    {approveCount === 3 && blockchain.account ?
-                                        <BasicSquareBtn
-                                            active={true}
-                                            onClick={() => shortStartHandler()}>
-                                            short start
-                                        </BasicSquareBtn> : null
-                                    }
+                                    <BasicSquareBtn
+                                        active={isValid || approveCount === 0}
+                                        onClick={() => {
+                                            if (approveCount === 0) {
+                                                multiApproveAll();
+                                            } else {
+                                                shortStartHandler();
+                                            }
+                                        }}>
+                                        {approveCount === 0 && blockchain.account ?
+                                            'Approve Tokens' : null
+                                        }
+                                        {approveCount === 1 && blockchain.account ?
+                                            'Approve Token' : null
+                                        }
+                                        {approveCount === 3 && blockchain.account ?
+                                            'Short Start' : null
+                                        }
+                                    </BasicSquareBtn>
                                 </>
                         }
                     </SizeBox>
@@ -407,15 +531,29 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
                             <Title>
                                 Your LTV
                             </Title>
+                            <LTImg/>
 
-                            <SizeBox h={80}/>
-                            <PercentBar value={barValue} onChange={onChangeBar} step={0.1} min={0} max={70}/>
+                            <SizeBox h={30}/>
+                            <PerBorder>
+                                {barValue} %
+                            </PerBorder>
+
+                            <SizeBox h={10}/>
+                            <PercentBar value={barValue} onChange={onChangeBar}
+                                        step={0.1} min={0} max={50}/>
+
+                            <LTVImg/>
                         </Backboard_2>
 
                         <SizeBox h={20}/>
                         <Backboard_2>
                             <Title>
                                 Health Factor
+
+                                <SizeBox w={5}/>
+                                <ToolTip title={'Health Factor: '}>
+                                    Your collateral X Max LTV Short / Token value
+                                </ToolTip>
                             </Title>
 
                             <SizeBox h={60}/>
@@ -423,14 +561,23 @@ function ShortStart({setTitle, setContent, setLink, setModal, setType, setLoadin
                                 <Heart/>
 
                                 <SizeBox w={16}/>
-                                1.5325
+                                {healthFactor < 10000 ? healthFactor : '0.000'}
                             </div>
                         </Backboard_2>
 
                         <SizeBox h={20}/>
                         <Backboard_2>
                             <Title>
-                                Gas Fee(Estimated)
+                                Now Gas Price
+
+                                <SizeBox w={5}/>
+                                <ToolTip title={'Estimated Gas fee : '}>
+                                    From deposit to withdraw,
+                                    each network usage fee you use
+                                    will be calculated differently
+                                    depending on the overall network
+                                    (currently Ethereum) usage.
+                                </ToolTip>
                             </Title>
 
                             <SizeBox h={60}/>

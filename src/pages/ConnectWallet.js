@@ -7,10 +7,11 @@ import {useDispatch, useSelector} from "react-redux";
 import {connect, connectFailed} from "../redux/blockchain/blockchainActions";
 import {DATA_TYPES} from "../redux/data/dataReducer";
 import DataApi from "../network/DataApi";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useLayoutEffect} from "react";
 import Loading from "./Loading";
 import ActionsAPI from "../network/ActionsAPI";
 import {BLOCK_ACTION_TYPES} from "../redux/blockchain/blockchainReducer";
+import ApproveModal from "../components/global/modals/Modals/ApproveModal";
 
 const Title = styled.p`
   text-align: center;
@@ -30,9 +31,40 @@ function ConnectWallet() {
     const dispatch = useDispatch();
     const actionApi = new ActionsAPI();
     const dataApi = new DataApi();
+
     const [loading, setLoading] = useState(true);
-    const [test, setTest] = useState('');
     const [isSubWalletExist, setIsSubWalletExist] = useState(false);
+
+    const walletConnectHandler = async (e) => {
+        try {
+            const web3Data = await dispatch(await connect());
+
+            if (web3Data) {
+                await checkSubWallet(web3Data);
+                await checkApprove();
+            }
+            if (isSubWalletExist) {
+                localStorage.setItem(DATA_TYPES.AUTH, 'true');
+                await dispatch(await connect());
+            }
+        } catch (e) {
+            setLoading(false);
+        }
+    }
+
+    const createWalletHandler = async (e) => {
+        if (!isSubWalletExist) {
+            setLoading(true);
+            const result = await actionApi.createWalletW(blockchain);
+            if (result) {
+                setIsSubWalletExist(true);
+                window.location.reload();
+            } else {
+                dispatch(connectFailed("Create wallet please."));
+            }
+            setLoading(false);
+        }
+    }
 
     const checkSubWallet = async (web3Data) => {
         const wallet = await dataApi.getSubWallet(web3Data);
@@ -40,10 +72,16 @@ function ConnectWallet() {
         setIsSubWalletExist(wallet != 'false');
     }
 
-    const walletConnectHandler = async (e) => {
-        const web3Data = await dispatch(await connect());
-        if(web3Data) {
-            await checkSubWallet(web3Data);
+    const [modal, setModal] = useState(false);
+    const [daiApp, setDaiApp] = useState(false);
+    const [ethApp, setEthApp] = useState(false);
+
+    const checkApprove = async () => {
+        const tokenData = await dataApi.isApprovedAavePool(blockchain);
+        if(tokenData) {
+            setDaiApp(true);
+        } else {
+            setDaiApp(false);
         }
     }
 
@@ -52,72 +90,94 @@ function ConnectWallet() {
         await dispatch(await connect());
     }
 
-    const createWalletHandler = async (e) => {
-        if(!isSubWalletExist) {
-            const result = await actionApi.createWallet(blockchain);
-            if (result) {
-                localStorage.setItem(DATA_TYPES.AUTH, 'true');
-                await dispatch(await connect());
-            } else {
-                dispatch(connectFailed("Create wallet please."));
-            }
+    useEffect(async () => {
+        if (blockchain.account) {
+            await checkSubWallet(blockchain);
+            await checkApprove();
+            setLoading(false);
         }
-    }
+        if (blockchain.errorMsg === 'Connect Rejected') {
+            setLoading(false);
+        }
+    }, [blockchain.account, blockchain.errorMsg]);
 
     useEffect(async () => {
-        const web3Data = await dispatch(await connect());
-
-        if(web3Data) {
-            await checkSubWallet(web3Data);
+        if(blockchain.account) {
+            if(isSubWalletExist) {
+                if(daiApp) {
+                    if(!modal) {
+                        await dispatch(await connect());
+                        localStorage.setItem(DATA_TYPES.AUTH, 'true');
+                    }
+                }
+            }
         }
-        setLoading(false);
-    }, [window.location]);
+    }, [setModal]);
+
+    useLayoutEffect(() => {
+        dispatch({type: DATA_TYPES.MENU, data: ''})
+    }, []);
 
     return (
         <>
             {loading ?
                 <Loading/> :
-                <div className={'f-column a-center j-center'}>
-                    <SizeBox h={300}/>
-                    <Logo/>
-
-                    <SizeBox h={16}/>
-                    <Title>
-                        Please, Connect your wallet
-                    </Title>
-
-                    <SizeBox h={12}/>
-                    <SubTitle>
-                        Please connect your wallet to open positions.
-                    </SubTitle>
-
-                    {blockchain.errorMsg != '' ? <SizeBox h={30}/> : null}
-                    {blockchain.errorMsg != '' ? blockchain.errorMsg : null}
-
-                    <SizeBox h={40}/>
-
-                    {blockchain.account == null ?
-                        <SizeBox w={126} h={48}>
-                            <SquareBtn active={true} type={0} onClick={walletConnectHandler}>
-                                Connect Wallet
-                            </SquareBtn>
-                        </SizeBox> :
-                        isSubWalletExist ?
-                            <SizeBox w={126} h={48}>
-                                <SquareBtn active={true} type={0} onClick={reconnect}>
-                                    Reconnect
-                                </SquareBtn>
-                            </SizeBox> : null
+                <>
+                    {modal ? <ApproveModal setModal={setModal}
+                                           daiApp={daiApp} setDaiApp={setDaiApp}
+                                           ethApp={ethApp} setEthApp={setEthApp}/> :
+                        null
                     }
+                    <div className={'f-column a-center j-center'}>
+                        <SizeBox h={300}/>
+                        <Logo/>
 
-                    {!isSubWalletExist && blockchain.account != null ?
+                        <SizeBox h={16}/>
+                        <Title>
+                            Please, Connect your wallet
+                        </Title>
+
+                        <SizeBox h={12}/>
+                        <SubTitle>
+                            Please connect your wallet to open positions.
+                        </SubTitle>
+
+                        {/*{blockchain.errorMsg != '' ? <SizeBox h={30}/> : null}*/}
+                        {/*{blockchain.errorMsg != '' ? blockchain.errorMsg : null}*/}
+
+                        <SizeBox h={40}/>
+
                         <SizeBox w={126} h={48}>
-                            <SquareBtn active={true} type={0} onClick={createWalletHandler}>
-                                Create SubWallet
+                            <SquareBtn active={true} type={0} onClick={(e) => {
+                                if (blockchain.account == null) {
+                                    walletConnectHandler(e);
+                                } else {
+                                    if (isSubWalletExist) {
+                                        if(daiApp) {
+                                            reconnect(e);
+                                        } else {
+                                            setModal(true);
+                                        }
+                                    }
+                                }
+                                if (!isSubWalletExist && blockchain.account != null) {
+                                    createWalletHandler(e);
+                                }
+                            }}>
+                                {
+                                    blockchain.account == null ?
+                                        'Connect' : (isSubWalletExist && daiApp ? 'Reconnect' : null)
+                                }
+                                {
+                                    !isSubWalletExist && blockchain.account != null ? 'Create SubWallet' : null
+                                }
+                                {
+                                    isSubWalletExist && !daiApp && blockchain.account !== null ? 'Approve' : null
+                                }
                             </SquareBtn>
-                        </SizeBox> : null
-                    }
-                </div>
+                        </SizeBox>
+                    </div>
+                </>
             }
         </>
     );

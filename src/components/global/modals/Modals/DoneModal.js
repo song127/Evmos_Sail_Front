@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import {COLORS as c} from "../../../../styles/colors";
 import ModalWrapper from "./ModalWrapper";
-import {ContentLoaded} from "../../../utils/actions/ContentLoaded";
+import {ContentLoaded} from "../../../utils/actions/Animations";
 import SizeBox from "../../../utils/blocks/SizeBox";
 import {CompleteTypes, ModalOptions} from "../../../../pages/home/short_selling";
 import {Link} from "react-router-dom";
@@ -61,7 +61,7 @@ const Btn = styled.button`
 
   background-color: ${props => props.yes ? c.blue_2 : c.white};
   border-radius: 8px;
-  border: ${props => props.yes ? null : '2px solid ${c.light_gray}'};
+  border: ${props => props.yes ? null : `2px solid ${c.light_gray}`};
 
   color: ${props => props.yes ? c.white : c.font_color};
   font-size: 12px;
@@ -77,13 +77,6 @@ function DoneModal({title, content, setModal, type, link, ...props}) {
                 </Title>
 
                 <SizeBox h={12}/>
-                {/*{content.split('\n').map((value, index) => {*/}
-                {/*    return (*/}
-                {/*        <Desc>*/}
-                {/*            {value}<br/>*/}
-                {/*        </Desc>*/}
-                {/*    );*/}
-                {/*})}*/}
                 <Desc>
                     {content}
                 </Desc>

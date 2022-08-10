@@ -53,14 +53,18 @@ export const TOKEN_INPUT_STATE = {
 const TokenInput = forwardRef(({
                                    state = TOKEN_INPUT_STATE.DEFAULT,
                                    disabled = false,
-                                   input,
-                                   onChange,
+                                   input = '',
+                                   onChange = () => {
+                                   },
                                    holder = 'Input',
                                    btn,
                                    ...props
                                }, ref) =>
     <InputBoard state={state}>
-        <InputBody ref={ref} disabled={disabled} placeholder={holder} defaultValue={input} onChange={onChange}/>
+        <InputBody type={'number'} maxlength={'5'}
+                   ref={ref} disabled={disabled}
+                   placeholder={holder} value={input}
+                   onChange={onChange}/>
         {btn !== undefined ?
             <>
                 {btn}

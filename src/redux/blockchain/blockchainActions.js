@@ -60,7 +60,8 @@ export const connect = async () => {
 
                         // Add listeners start
                         window.ethereum.on("accountsChanged", (accounts) => {
-                            dispatch(updateAccount(accounts[0]));
+                            dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
+                            window.location.reload();
                         });
                         window.ethereum.on("chainChanged", async () => {
                             const networkId = await window.ethereum.request({
@@ -85,7 +86,7 @@ export const connect = async () => {
                     dispatch(connectFailed("Change network to Kovan Network."));
                 }
             } catch (err) {
-                dispatch(connectFailed("Something went wrong."));
+                dispatch(connectFailed("Connect Rejected"));
             }
         } else {
             dispatch(connectFailed("Install Metamask."));
