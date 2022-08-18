@@ -126,6 +126,7 @@ class DataApi {
         const web3 = blockchain.web3;
         const account = blockchain.account;
         const sub = await this.getSubWallet(blockchain);
+        console.log(sub);
         if(sub === 'false') {
             return false;
         }
