@@ -36,11 +36,15 @@ const BtnSetting = { // border, font, back
     },
     1: {
         true: [c.blue_2, c.blue_2, c.white],
-        false: [c.light_gray, c.light_gray, c.white],
+        false: [c.gray_2, c.gray_2, c.white],
+    },
+    2: {
+        true: [c.gray_3, c.black, c.white],
+        false: [c.gray_2, c.gray_2, c.white]
     }
 }
 
-// 0 : colored, 1 : un colored
+// 0 : colored, 1 : un colored, 2: black
 function SquareBtn({type = 0, active = false, onClick, ...props}) {
     const onClicked = active ? onClick : null;
     const bColor = BtnSetting[type][active][0];

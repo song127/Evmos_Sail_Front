@@ -31,13 +31,20 @@ const InputBody = styled.input`
   height: 38px;
   padding: 0px 0px 0px 20px;
   background-color: transparent;
-
+  
   transition: all 0.3s;
 
+  font-weight: 600;
+  font-size: 14px;
+
   &::-webkit-input-placeholder {
-    color: ${c.gray_3};
-    font-size: 14px;
-    font-weight: 400;
+    color: ${c.gray_2};
+    font-family: Montserrat;
+    font-style: normal; 
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    opacity: 0.5;
   }
 
   &:focus {
@@ -46,7 +53,7 @@ const InputBody = styled.input`
 `;
 
 export const TOKEN_INPUT_STATE = {
-    DEFAULT: c.gray_4,
+    DEFAULT: c.gray_3,
     FOCUS: c.blue_1,
 }
 
@@ -54,14 +61,13 @@ const TokenInput = forwardRef(({
                                    state = TOKEN_INPUT_STATE.DEFAULT,
                                    disabled = false,
                                    input = '',
-                                   onChange = () => {
-                                   },
+                                   onChange = () => {},
                                    holder = 'Input',
                                    btn,
                                    ...props
                                }, ref) =>
     <InputBoard state={state}>
-        <InputBody type={'number'} maxlength={'5'}
+        <InputBody type={'number'}
                    ref={ref} disabled={disabled}
                    placeholder={holder} value={input}
                    onChange={onChange}/>

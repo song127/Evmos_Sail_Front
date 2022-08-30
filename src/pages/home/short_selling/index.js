@@ -16,8 +16,8 @@ import ShortStart from "./ShortStart";
 import ShortEnd from "./ShortEnd";
 import ToastMessage, {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
 import Loading from "../../Loading";
-import DoneModal from "../../../components/global/modals/Modals/DoneModal";
-import LoadingModal from "../../../components/global/modals/Modals/LoadingModal";
+import DoneModal from "../../../components/global/modals/DoneModal";
+import LoadingModal from "../../../components/global/modals/LoadingModal";
 
 const Container = styled.div`
   display: flex;
@@ -76,10 +76,6 @@ function ShortSelling() {
     const [type, setType] = useState(0);
     const [loadingModal, setLoadingModal] = useState(false);
 
-    const isPc = useMediaQuery({
-        query: '(min-width: 1080px)'
-    });
-
     useLayoutEffect(() => {
         dispatch({type: DATA_TYPES.MENU, data: 'short'})
     }, []);
@@ -104,24 +100,23 @@ function ShortSelling() {
                         <RoundTab list={tabList} index={tabIndex} setIndex={setTabIndex}/>
                     </SizeBox>
 
-                    <Visibility visibility={tabIndex === 0 && !loading}>
-                        <ShortStart setLoading={setLoading}
-                                    setTitle={setTitle}
-                                    setContent={setContent}
-                                    setLink={setLink}
-                                    setModal={setModal}
-                                    setType={setType}
-                                    setLoadingModal={setLoadingModal}/>
-                    </Visibility>
-                    <Visibility visibility={tabIndex === 1 && !loading}>
-                        <ShortEnd setLoading={setLoading}
-                                  setTitle={setTitle}
-                                  setContent={setContent}
-                                  setLink={setLink}
-                                  setModal={setModal}
-                                  setType={setType}
-                                  setLoadingModal={setLoadingModal}/>
-                    </Visibility>
+                    {
+                        tab === 0 ?
+                            <ShortStart setLoading={setLoading}
+                                        setTitle={setTitle}
+                                        setContent={setContent}
+                                        setLink={setLink}
+                                        setModal={setModal}
+                                        setType={setType}
+                                        setLoadingModal={setLoadingModal}/> :
+                            <ShortEnd setLoading={setLoading}
+                                      setTitle={setTitle}
+                                      setContent={setContent}
+                                      setLink={setLink}
+                                      setModal={setModal}
+                                      setType={setType}
+                                      setLoadingModal={setLoadingModal}/>
+                    }
                     <SizeBox h={120}/>
                 </Container>
             </Visibility>

@@ -13,6 +13,16 @@ import {Link} from "react-router-dom";
 import Loading from "../../Loading";
 import DataApi from "../../../network/DataApi";
 import Web3 from "web3";
+import H5 from "../../../components/utils/texts/H5";
+import Sub1 from "../../../components/utils/texts/Sub1";
+import Spacer from "../../../components/utils/blocks/Spacer";
+import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
+import Token from "../../../components/global/Token";
+import ToolTip from "../../../components/global/ToolTip";
+import Sub2 from "../../../components/utils/texts/Sub2";
+import Sub3 from "../../../components/utils/texts/Sub3";
+import Body1 from "../../../components/utils/texts/Body1";
+
 const web3 = new Web3('');
 
 const Container = styled.div`
@@ -43,7 +53,7 @@ const ColorBox = styled.div`
 
 const BackBoard = styled.div`
   width: 518px;
-  height: 800px;
+  height: 750px;
 
   background-color: ${c.white};
   border-radius: 16px;
@@ -89,11 +99,12 @@ const Amount = styled.div`
 `;
 
 const CustomLink = styled(Link)`
-  color: ${c.blue_3};
+  color: ${c.blue_2};
   font-family: Montserrat;
   font-style: normal;
   font-weight: 400;
   font-size: 12px;
+  line-height: 15px;
   text-decoration-line: underline;
 `;
 
@@ -109,27 +120,20 @@ const BottomTitle = styled.div`
 
 const BottomSubTitle = styled.div`
   cursor: pointer;
-  
+
   width: max-content;
   height: max-content;
 
-  color: ${c.gray_3};
+  color: ${c.black};
   font-size: 14px;
   font-family: Montserrat;
-  font-weight: 500;
+  font-weight: 600;
 `;
 
-const Token = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 110px;
-  height: 50px;
-
-  font-weight: 400;
-  font-family: Montserrat;
-  font-size: 16px;
+const DashedDivider = styled.div`
+  width: 100%;
+  height: 0px;
+  border-top: 1.5px dashed ${c.gray_2};
 `;
 
 function CurrentAsset() {
@@ -166,35 +170,37 @@ function CurrentAsset() {
     }
 
     const getDatas = async () => {
-        if(blockchain.account) {
+        if (blockchain.account) {
             const shortData = await dataApi.getShortData(blockchain);
-            const colData = await dataApi.getCollateralData(blockchain);
             const ethValue = await getPrice();
-            const health = await dataApi.getHealth(blockchain);
+            if (parseInt(shortData[1]) != 0) {
+                const colData = await dataApi.getCollateralData(blockchain);
+                const health = await dataApi.getHealth(blockchain);
 
-            const shoData = shortData[1] / web3.utils.toBN(10).pow(web3.utils.toBN(18));
-            const initPrice = shortData[2] / web3.utils.toBN(10).pow(web3.utils.toBN(18));
+                const shoData = shortData[1] / web3.utils.toBN(10).pow(web3.utils.toBN(18));
+                const initPrice = shortData[2] / web3.utils.toBN(10).pow(web3.utils.toBN(18));
+
+                // daiValue = 1 Dai 당 현재 Eth 가격
+                // shoData = 빌린 eth 금액
+                // calcValue = 빌린 eth 가 현재 몇 Dai 인지
+                const calcValue = (ethValue * shoData).toFixed(14).toString();
+
+                // initPrice = 빌릴 당시 얼마만큼 Dai 가 들었는지
+                setCollateral(colData);
+                setHealth(health['healthFactor'] / (10 ** 18));
+                setShort(shoData);
+                setProfit(initPrice - parseFloat(calcValue));
+            }
             const balanceData = await dataApi.getMyDaiBalance(blockchain);
             const subBalance = await dataApi.getDepositDaiBalance(blockchain);
-
-            // daiValue = 1 Dai 당 현재 Eth 가격
-            // shoData = 빌린 eth 금액
-            // calcValue = 빌린 eth 가 현재 몇 Dai 인지
-            const calcValue = (ethValue * shoData).toFixed(14).toString();
-
-            // initPrice = 빌릴 당시 얼마만큼 Dai 가 들었는지
-            setCollateral(colData);
-            setHealth(health['healthFactor'] / (10**18));
-            setShort(shoData);
-            setProfit(initPrice - parseFloat(calcValue));
             setMyBalance(balanceData);
             setSubBalance(subBalance);
         }
     }
 
     useEffect(() => {
-        if(blockchain.account) {
-            if(short === 0.0) {
+        if (blockchain.account) {
+            if (short === 0.0) {
                 getDatas().then(() => {
                     setLoading(false);
                 });
@@ -319,7 +325,30 @@ function CurrentAsset() {
                         </ColorBox>
                     </div>
 
-                    <SizeBox h={35}/>
+                    <SizeBox h={40}/>
+                    <SubValueBackBoard>
+                        <H5 color={c.black}>
+                            Sub Wallet Balance
+                        </H5>
+
+                        <SizeBox h={10}/>
+                        <div className={'f-row'}>
+                            <Sub1>
+                                My total profit
+                            </Sub1>
+
+                            <Spacer/>
+                            <DAI/>
+
+                            <SizeBox w={8}/>
+                            <H5>
+                                0,0000
+                                {/*{availableDAI.toFixed(4).replace('.', ',')}*/}
+                            </H5>
+                        </div>
+                    </SubValueBackBoard>
+
+                    <SizeBox h={40}/>
                     <Title>
                         Details
                     </Title>
@@ -334,13 +363,24 @@ function CurrentAsset() {
                                 </CustomLink>
                             </div>
 
-                            <SizeBox h={55}/>
-                            <BottomTitle>
+                            <SizeBox h={80}/>
+                            <H5 align={'start'}>
                                 Collateral
-                            </BottomTitle>
+                            </H5>
+
+                            <SizeBox h={16}/>
+                            <SizeBox w={'100%'} h={60}>
+                                <TokenInput holder={'0.000'} disabled={true} input={collateral.toFixed(5)}
+                                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
+                            </SizeBox>
 
                             <SizeBox h={10}/>
-                            <div className={'f-row j-end'}>
+                            <div className={'f-row j-start a-center'}>
+                                <ToolTip>
+                                    Change
+                                </ToolTip>
+
+                                <SizeBox w={20}/>
                                 <BottomSubTitle onClick={getPrice}>
                                     {priceIndex === 0 ?
                                         `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
@@ -349,17 +389,11 @@ function CurrentAsset() {
                                 </BottomSubTitle>
                             </div>
 
-                            <SizeBox h={16}/>
-                            <SizeBox w={'100%'} h={60}>
-                                <TokenInput holder={'0.000'} disabled={true} input={collateral.toFixed(5)}
-                                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                            </SizeBox>
-
                             {/**/}
                             <SizeBox h={60}/>
-                            <BottomTitle>
-                                Your LTV
-                            </BottomTitle>
+                            <H5 align={'start'}>
+                                My LTV
+                            </H5>
 
                             <SizeBox h={16}/>
                             <SizeBox w={'100%'} h={60}>
@@ -367,17 +401,46 @@ function CurrentAsset() {
                                             btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
                             </SizeBox>
 
-                            {/**/}
-                            <SizeBox h={60}/>
-                            <BottomTitle>
-                                Max LV
-                            </BottomTitle>
+                            <SizeBox h={10}/>
+                            <Body1 align={'start'}>
+                                MAX LTV : 0.0 DAI
+                            </Body1>
 
-                            <SizeBox h={16}/>
-                            <SizeBox w={'100%'} h={60}>
-                                <TokenInput holder={'0.000'} disabled={true} input={'50'}
-                                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                            </SizeBox>
+                            <SizeBox h={75}/>
+                            <div className={'f-row a-center'}>
+                                <H5>
+                                    Health Factor
+                                </H5>
+
+                                <SizeBox w={8}/>
+                                <ToolTip title={'Health'}>
+                                    Factor
+                                </ToolTip>
+
+                                <Spacer/>
+                                <Heart/>
+                                <SizeBox w={16}/>
+                                <H5>
+                                    {health.toFixed(3)}
+                                </H5>
+                            </div>
+
+                            <SizeBox h={30}/>
+                            <div className={'f-row a-center'}>
+                                <H5>
+                                    APY (Variable)
+                                </H5>
+
+                                <SizeBox w={8}/>
+                                <ToolTip title={'APY'}>
+                                    Variable
+                                </ToolTip>
+
+                                <Spacer/>
+                                <H5>
+                                    {health.toFixed(1)} %
+                                </H5>
+                            </div>
                         </BackBoard>
 
                         {/* RIGHT */}
@@ -389,10 +452,10 @@ function CurrentAsset() {
                                 </CustomLink>
                             </div>
 
-                            <SizeBox h={55}/>
-                            <BottomTitle>
+                            <SizeBox h={80}/>
+                            <H5 align={'start'}>
                                 Short Token
-                            </BottomTitle>
+                            </H5>
 
                             <SizeBox h={16}/>
                             <SizeBox w={'100%'} h={60}>
@@ -400,65 +463,64 @@ function CurrentAsset() {
                                             btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
                             </SizeBox>
 
-                            <SizeBox h={24}/>
-                            {/*<div className={'f-row j-start'}>*/}
-                            {/*    <BottomSubTitle onClick={getPrice}>*/}
-                            {/*        {priceIndex === 0 ?*/}
-                            {/*            `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :*/}
-                            {/*            `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`*/}
-                            {/*        }*/}
-                            {/*    </BottomSubTitle>*/}
-                            {/*</div>*/}
-
-                            {/**/}
-                            <SizeBox h={60}/>
-                            <BottomTitle>
+                            <SizeBox h={88}/>
+                            <H5 align={'start'}>
                                 Current Profit
-                            </BottomTitle>
+                            </H5>
 
                             <SizeBox h={16}/>
                             <SizeBox w={'100%'} h={60}>
                                 <TokenInput holder={'0.000'} disabled={true} input={profit}
                                             btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
                             </SizeBox>
-
-                            {/**/}
-                            <SizeBox h={65}/>
-                            <BottomTitle>
-                                Health Factor
-                            </BottomTitle>
-
-                            <SizeBox h={25}/>
-                            <div className={'f-row a-center'}>
-                                <Heart/>
+                            <SizeBox h={10}/>
+                            <div className={'f-row j-start a-center'}>
+                                <ToolTip>
+                                    Change
+                                </ToolTip>
 
                                 <SizeBox w={20}/>
-                                {health}
+                                <BottomSubTitle onClick={getPrice}>
+                                    {priceIndex === 0 ?
+                                        `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
+                                        `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
+                                    }
+                                </BottomSubTitle>
                             </div>
 
                             {/**/}
-                            {/*<SizeBox h={60}/>*/}
-                            {/*<BottomTitle>*/}
-                            {/*    Accumulated Interest*/}
-                            {/*</BottomTitle>*/}
+                            <SizeBox h={40}/>
+                            <DashedDivider/>
 
-                            {/*<SizeBox h={16}/>*/}
-                            {/*<SizeBox w={'100%'} h={60}>*/}
-                            {/*    <TokenInput holder={'0.000'} disabled={true} input={'124.1244'}*/}
-                            {/*                btn={<Token><ETH/><SizeBox w={10}/>ETH</Token>}/>*/}
-                            {/*</SizeBox>*/}
+                            <SizeBox h={40}/>
+                            <div className={'f-row a-center'}>
+                                <Body1>
+                                    Accumulated Interest
+                                </Body1>
 
-                            {/*/!**!/*/}
-                            {/*<SizeBox h={60}/>*/}
-                            {/*<BottomTitle>*/}
-                            {/*    TX Fee*/}
-                            {/*</BottomTitle>*/}
+                                <Spacer/>
+                                <DAI/>
 
-                            {/*<SizeBox h={16}/>*/}
-                            {/*<SizeBox w={'100%'} h={60}>*/}
-                            {/*    <TokenInput holder={'0.000'} disabled={true} input={'2.5234'}*/}
-                            {/*                btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>*/}
-                            {/*</SizeBox>*/}
+                                <SizeBox w={8}/>
+                                <Body1>
+                                    0.0
+                                </Body1>
+                            </div>
+
+                            <SizeBox h={20}/>
+                            <div className={'f-row a-center'}>
+                                <Body1>
+                                    Your Collateral
+                                </Body1>
+
+                                <Spacer/>
+                                <DAI/>
+
+                                <SizeBox w={8}/>
+                                <Body1>
+                                    {collateral.toFixed(1)}
+                                </Body1>
+                            </div>
                         </BackBoard>
                     </div>
 

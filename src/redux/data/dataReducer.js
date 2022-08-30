@@ -3,7 +3,7 @@ export const DATA_TYPES = {
   HEADER: 'HEADER',
   MENU: 'MENU',
   TAB: 'TAB',
-  LOADING: 'LOADING',
+  COUNT: '',
   DATA_RESET: 'DATA_RESET'
 }
 
@@ -11,7 +11,7 @@ const initialState = {
   header: false,
   menu: '',
   tab: 0,
-  loading: false,
+  count: 0,
 };
 
 export const dataReducer = (state = initialState, action) => {
@@ -26,9 +26,6 @@ export const dataReducer = (state = initialState, action) => {
       break;
     case DATA_TYPES.TAB:
       resultState.tab = action.data;
-      break;
-    case DATA_TYPES.LOADING:
-      resultState.loading = action.data;
       break;
     case DATA_TYPES.DATA_RESET:
       resultState = initialState;

@@ -6,20 +6,23 @@ import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import RoundTab from "../../../components/global/RoundTab";
 import SizeBox from "../../../components/utils/blocks/SizeBox";
 import {ContentLoaded} from "../../../components/utils/actions/Animations";
-import Selector from "../../../components/global/Selector";
 import TokenInput, {TOKEN_INPUT_STATE} from "../../../components/global/TokenInput";
 import BasicSquareBtn from "../../../components/global/BasicSquareBtn";
-import useMediaQuery from "react-responsive";
 import BorderButton from "../../../components/global/BorderButton";
-import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
 import {CompleteTypes} from "../short_selling";
 import ActionsAPI from "../../../network/ActionsAPI";
-import DoneModal from "../../../components/global/modals/Modals/DoneModal";
+import DoneModal from "../../../components/global/modals/DoneModal";
 import DataApi from "../../../network/DataApi";
 import Loading from "../../Loading";
-import actionsAPI from "../../../network/ActionsAPI";
-import LoadingModal from "../../../components/global/modals/Modals/LoadingModal";
+import LoadingModal from "../../../components/global/modals/LoadingModal";
 import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
+import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
+import H5 from "../../../components/utils/texts/H5";
+import Spacer from "../../../components/utils/blocks/Spacer";
+import Sub1 from "../../../components/utils/texts/Sub1";
+import {LOG} from "../../../styles/utils";
+import ToolTip from "../../../components/global/ToolTip";
+import Token from "../../../components/global/Token";
 
 const Container = styled.div`
   display: flex;
@@ -46,23 +49,6 @@ const Box = styled.div`
   padding-left: 58px;
   padding-right: 58px;
 `;
-
-const Token = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 110px;
-  height: 50px;
-
-  font-weight: 400;
-  font-family: Montserrat;
-  font-size: 16px;
-`;
-
-const itemList = [
-    'DAI',
-]
 
 const tabList = [
     'Deposit',
@@ -96,6 +82,7 @@ function DepositAndWithdraw() {
         setLoadingModal(false);
     }
 
+    const [ratio, setRatio] = useState(0);
     const [tabIndex, setTabIndex] = useState(0);
 
     const [availableDAI, setAvailableDAI] = useState(100);
@@ -105,10 +92,12 @@ function DepositAndWithdraw() {
     const [inputToken, setInputToken] = useState('');
 
     const inputTokenOnchange = (e) => {
+        setRatio(0);
         setInputToken(e.target.value);
     }
 
     const macroHandler = (value) => {
+        setRatio(value);
         if (tabIndex === 0) {
             const input = availableDAI * value / 100;
             setInputToken(input.toString());
@@ -155,7 +144,7 @@ function DepositAndWithdraw() {
             setTitle('Completed Withdraw');
             setContent('The Withdraw statement you sent has been requested.\n' +
                 'Go to your wallet and check out your wallet balance.');
-            setLink('/Short');
+            setLink(undefined);
             withdrawModalHandler();
             await getDatas();
         } else {
@@ -171,6 +160,7 @@ function DepositAndWithdraw() {
         if (blockchain.account) {
             const balance = await dataApi.getMyDaiBalance(blockchain);
             const myBalance = await dataApi.getDepositDaiBalance(blockchain);
+            LOG(balance);
             setAvailableDAI(balance);
             setMyBalance(myBalance);
 
@@ -182,15 +172,24 @@ function DepositAndWithdraw() {
     }
 
     useEffect(() => {
-        if(actionApi.checkNumber(inputToken)) {
+        if (actionApi.checkNumber(dataApi.toFixed(inputToken))) {
             setIsValid(true);
+            let ratioValue;
+            if(tabIndex === 0) {
+                ratioValue = parseFloat(inputToken) / availableDAI * 100;
+            } else {
+                ratioValue = parseFloat(inputToken) / myBalance * 100;
+            }
+            setRatio(ratioValue);
         } else {
             setIsValid(false);
         }
     }, [inputToken]);
 
-    useEffect(() => {
+    useEffect(async () => {
         setInputToken('');
+        setRatio(0);
+        await getDatas();
     }, [tabIndex]);
 
     useEffect(async () => {
@@ -208,18 +207,66 @@ function DepositAndWithdraw() {
                 <RoundTab list={tabList} index={tabIndex} setIndex={setTabIndex}/>
 
                 <SizeBox h={70}/>
+                <SubValueBackBoard>
+                    <H5 color={c.black}>
+                        {tabIndex === 0 ? 'Main Wallet Balance' : 'Sub Wallet Balance'}
+                    </H5>
+
+                    <SizeBox h={10}/>
+                    {
+                        tabIndex === 0 ?
+                            <div className={'f-row'}>
+                                <Sub1>
+                                    Available to deposit
+                                </Sub1>
+
+                                <Spacer/>
+                                <DAI/>
+
+                                <SizeBox w={8}/>
+                                <H5>
+                                    {availableDAI.toFixed(4).replace('.', ',')}
+                                </H5>
+                            </div> :
+                            <>
+                                <div className={'f-row'}>
+                                    <Sub1>
+                                        Available to withdraw
+                                    </Sub1>
+
+                                    <Spacer/>
+                                    <DAI/>
+
+                                    <SizeBox w={8}/>
+                                    <H5>
+                                        {myBalance.toFixed(4).replace('.', ',')}
+                                    </H5>
+                                </div>
+
+                                <div className={'f-row'}>
+                                    <Sub1>
+                                        My total profit
+                                    </Sub1>
+
+                                    <Spacer/>
+                                    <DAI/>
+
+                                    <SizeBox w={8}/>
+                                    <H5>
+                                        0,0000
+                                        {/*{availableDAI.toFixed(4).replace('.', ',')}*/}
+                                    </H5>
+                                </div>
+                            </>
+                    }
+                </SubValueBackBoard>
+
+                <SizeBox h={24}/>
                 <Box>
                     <SizeBox h={80}/>
-                    <div className={'f-row j-end a-center'}>
-                        {tabIndex === 0 ?
-                            `Available: ${availableDAI} DAI` :
-                            `My Balance: ${myBalance} DAI`
-                        }
-                    </div>
-                    <SizeBox h={8}/>
                     <SizeBox w={'100%'} h={60}>
                         <TokenInput
-                            ref={inputTokenRef} input={inputToken} disabled={false}
+                            ref={inputTokenRef} input={dataApi.toFixed(inputToken)} disabled={false}
                             state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
                             onChange={inputTokenOnchange}
                             btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
@@ -227,17 +274,20 @@ function DepositAndWithdraw() {
 
                     <SizeBox h={44}/>
                     <div className={'f-row a-center j-center'}>
-                        <BorderButton onClick={() => macroHandler(25)}>
+                        <BorderButton selected={ratio == 25}
+                                      onClick={() => macroHandler(25)}>
                             25%
                         </BorderButton>
 
                         <SizeBox w={12}/>
-                        <BorderButton onClick={() => macroHandler(50)}>
+                        <BorderButton selected={ratio == 50}
+                                      onClick={() => macroHandler(50)}>
                             50%
                         </BorderButton>
 
                         <SizeBox w={12}/>
-                        <BorderButton onClick={() => macroHandler(100)}>
+                        <BorderButton selected={ratio == 100}
+                                      onClick={() => macroHandler(100)}>
                             MAX
                         </BorderButton>
                     </div>
@@ -254,15 +304,29 @@ function DepositAndWithdraw() {
                                                 }
                                             }}
                             >
-                                {tabList[tabIndex]} Start
+                                {isValid ? tabList[tabIndex] : 'Enter an amount'}
                             </BasicSquareBtn>
                         </SizeBox> :
-                        <SizeBox w={'100%'} h={60}>
-                            <BasicSquareBtn active={true}
-                                            onClick={approveToken}>
-                                Approve Token
-                            </BasicSquareBtn>
-                        </SizeBox>
+                        <div className={'f-column a-center'}>
+                            <SizeBox w={'100%'} h={60}>
+                                <BasicSquareBtn active={true}
+                                                onClick={approveToken}>
+                                    Approve Token
+                                </BasicSquareBtn>
+                            </SizeBox>
+
+                            <SizeBox h={16}/>
+                            <div className={'f-row'}>
+                                <H5>
+                                    Why You Approve tokens
+                                </H5>
+
+                                <SizeBox w={8}/>
+                                <ToolTip>
+                                    Approve Tooltip
+                                </ToolTip>
+                            </div>
+                        </div>
                     }
 
                     <SizeBox h={100}/>

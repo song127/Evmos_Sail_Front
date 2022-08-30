@@ -3,6 +3,8 @@ import {TokenAbi} from "../datas/TokenAbi";
 import {TokenAddress} from "../datas/Address";
 import ConnectorProvider from "./ConnectorProvider";
 import Web3 from "web3";
+import {LOG} from "../styles/utils";
+
 const web3G = new Web3();
 
 class DataApi {
@@ -44,9 +46,6 @@ class DataApi {
         );
         const result = balance / web3.utils.toBN(10).pow(web3.utils.toBN(18));
 
-        setTimeout(() => {
-        }, 1000);
-
         return result;
     }
 
@@ -54,7 +53,6 @@ class DataApi {
         const web3 = blockchain.web3;
         const account = blockchain.account;
         const sub = await this.getSubWallet(blockchain);
-        console.log(sub);
         const tokenAbi = TokenAbi;
 
         // Create contract object
@@ -70,9 +68,6 @@ class DataApi {
             }
         );
         const result = balance / web3.utils.toBN(10).pow(web3.utils.toBN(18));
-
-        setTimeout(() => {
-        }, 1000);
 
         return result;
     }
@@ -126,8 +121,7 @@ class DataApi {
         const web3 = blockchain.web3;
         const account = blockchain.account;
         const sub = await this.getSubWallet(blockchain);
-        console.log(sub);
-        if(sub === 'false') {
+        if (sub === 'false') {
             return false;
         }
         const tokenAbi = TokenAbi;
@@ -176,9 +170,7 @@ class DataApi {
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
-        const value = await contract.methods.getShort(sub).call(
-            {from: account}
-        );
+        const value = await contract.methods.getShort(sub).call();
 
         return value;
     }
@@ -189,9 +181,18 @@ class DataApi {
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
-        const value = await contract.methods.getCollateral(TokenAddress.DAI).call(
-            {from: account}
-        );
+        const value = await contract.methods.getCollateral(TokenAddress.DAI).call();
+        const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+
+        return result;
+    }
+
+    getTotalProfit = async (block) => {
+        const sub = await new DataApi().getSubWallet(block);
+
+        const contract = await new ConnectorProvider().walletConnector(block, sub);
+
+        const value = await contract.methods.totalProfit().call();
         const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
 
         return result;
@@ -204,10 +205,7 @@ class DataApi {
         const sub = await new DataApi().getSubWallet(blockchain);
         const contract = await new ConnectorProvider().aaveConnector(blockchain);
 
-        const value = await contract.methods.getUserAccountData(sub).call(
-            {from: account}
-        );
-        console.log(value);
+        const value = await contract.methods.getUserAccountData(sub).call();
 
         return value;
     }
@@ -230,7 +228,7 @@ class DataApi {
 
         const amount = web3G.utils.toHex(web3G.utils.toWei('1'));
         let value;
-        if(mode === 0) {
+        if (mode === 0) {
             const path = [TokenAddress.DAI, wEthPath];
             value = await contract.methods.getAmountsOut(amount, path).call(
                 {from: account}
@@ -258,6 +256,25 @@ class DataApi {
         const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
 
         return result;
+    }
+
+    // Util
+    toFixed = (x) => {
+        if (Math.abs(x) < 1.0) {
+            let e = parseInt(x.toString().split('e-')[1]);
+            if (e) {
+                x *= Math.pow(10, e - 1);
+                x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+            }
+        } else {
+            let e = parseInt(x.toString().split('+')[1]);
+            if (e > 20) {
+                e -= 20;
+                x /= Math.pow(10, e);
+                x += (new Array(e + 1)).join('0');
+            }
+        }
+        return x;
     }
 }
 

@@ -1,3 +1,5 @@
+import {WALLET_ERRORS} from "../../network/errors/WalletErrors";
+
 export const BLOCK_ACTION_TYPES = {
     CONNECTION_REQUEST: 'CONNECTION_REQUEST',
     CONNECTION_SUCCESS: 'CONNECTION_SUCCESS',
@@ -13,7 +15,7 @@ const initialState = {
     subWallet: null,
     smartContract: null,
     web3: null,
-    errorMsg: "It worked at only kovan network",
+    error: -1,
 };
 
 const blockchainReducer = (state = initialState, action) => {
@@ -21,6 +23,7 @@ const blockchainReducer = (state = initialState, action) => {
 
     switch (action.type) {
         case BLOCK_ACTION_TYPES.CONNECTION_REQUEST:
+            resultState.error = -1;
             resultState.loading = true;
             break;
         case BLOCK_ACTION_TYPES.CONNECTION_SUCCESS:
@@ -28,10 +31,11 @@ const blockchainReducer = (state = initialState, action) => {
             resultState.account = action.payload.account;
             resultState.smartContract = action.payload.smartContract;
             resultState.web3 = action.payload.web3;
+            resultState.error = -1;
             break;
         case BLOCK_ACTION_TYPES.CONNECTION_FAILED:
             resultState.loading = false;
-            resultState.errorMsg = action.payload;
+            resultState.error = action.payload;
             break;
         case BLOCK_ACTION_TYPES.UPDATE_ACCOUNT:
             resultState.account = action.payload.account;
@@ -41,6 +45,7 @@ const blockchainReducer = (state = initialState, action) => {
             break;
         case BLOCK_ACTION_TYPES.BLOCK_RESET:
             resultState = initialState;
+            resultState.error = -2;
         default:
     }
 

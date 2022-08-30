@@ -17,6 +17,7 @@ import {useSelector} from "react-redux";
 import ActionsAPI from "../../../network/ActionsAPI";
 import DataApi from "../../../network/DataApi";
 import ToolTip from "../../../components/global/ToolTip";
+import Token from "../../../components/global/Token";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -31,19 +32,6 @@ const Backboard_1 = styled.div`
   border-radius: 16px;
   box-sizing: border-box;
   padding: 50px 60px;
-`;
-
-const Token = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 110px;
-  height: 50px;
-
-  font-weight: 400;
-  font-family: Montserrat;
-  font-size: 16px;
 `;
 
 // Sub
@@ -91,6 +79,9 @@ const shorItemList = ['ETH'];
 
 function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType, setLoadingModal}) {
     const blockchain = useSelector(state => state.blockchain);
+    const tab = useSelector(state => state.data.tab);
+    let mounted = true;
+
     const actionApi = new ActionsAPI();
     const dataApi = new DataApi();
 
@@ -141,6 +132,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     }
 
     const getDatas = async () => {
+        if(!mounted) { return }
         const shortData = await dataApi.getShortData(blockchain);
         const ethValue = await getPrice();
         if(parseInt(shortData[1]) != 0) {
@@ -153,6 +145,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
 
             const calcValue = (ethValue * shoData).toFixed(14).toString();
 
+            if(!mounted) { return }
             setIsValid(true);
             setProfit(initPrice - parseFloat(calcValue));
             setNowCollateral(colData);
@@ -162,6 +155,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
             );
             setHealthFactor(health['healthFactor'] / (10**18));
         } else {
+            if(!mounted) { return }
             setIsValid(false);
             setProfit(0);
             setInterest(0);
@@ -173,10 +167,14 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     useEffect(async () => {
         if(blockchain.account) {
             await getDatas().then(() => {
+                if(!mounted) { return }
                 setLoading(false);
             });
         }
-    }, [blockchain.account]);
+        return () => {
+            mounted = false;
+        }
+    }, [blockchain.account, tab]);
 
     return (
         <>

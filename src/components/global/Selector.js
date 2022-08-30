@@ -48,7 +48,7 @@ const SelectedValue = styled.div`
 const DownArrowC = styled(DownArrow)`
   top: -4px;
   transition: 0.2s;
-  transform: rotate(${props => props.active ? '0deg' : '-180deg'});
+  transform: rotate(${props => props.active === 'true' ? '0deg' : '-180deg'});
 `;
 
 const OptionWrapper = styled.div`
@@ -64,7 +64,7 @@ const OptionWrapper = styled.div`
   position: absolute;
   top: 55px;
 
-  ${props => props.active ? 'opacity: 1;\n  max-height: 130px;\n  z-index: 1;' : null}
+  ${props => props.active === 'true' ? 'opacity: 1;\n  max-height: 130px;\n  z-index: 1;' : null}
   &::-webkit-scrollbar {
     width: 3px;
     background: ${c.gray_4};
@@ -128,10 +128,10 @@ function Selector({list, index = 0, setIndex, disable = false, ...props}) {
                 <SizeBox w={10}/>
                 {list[index]}
                 <Spacer/>
-                <DownArrowC active={active}/>
+                <DownArrowC active={active.toString()}/>
                 <SizeBox w={20}/>
             </SelectedValue>
-            <OptionWrapper active={active}>
+            <OptionWrapper active={active.toString()}>
                 {list.map((value, idx) => (
                     <OptionItem key={idx} selected={index === idx} onClick={() => setIndex(idx)}>
                         {value === 'ETH' ? <ETH/> : null}

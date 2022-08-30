@@ -17,8 +17,10 @@ const Container = styled.button`
   opacity: 0.95;
 
   font-family: Montserrat;
-  font-size: 12px;
-  color: ${c.gray_3};
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+  color: ${c.gray};
 
   transition: all 0.3s;
 
@@ -26,12 +28,12 @@ const Container = styled.button`
   background-color: ${c.blue_2};
   color: ${c.white};
   &:hover {
-    opacity: 1.2;
+    background-color: ${c.blue_1};
   }
   ` : {}}
 `;
 
-function BasicSquareBtn({active = false, onClick, ...props}) {
+function BasicSquareBtn({active = false, onClick = () => {}, ...props}) {
     return (
         <Container active={active} onClick={onClick}>
             {props.children}

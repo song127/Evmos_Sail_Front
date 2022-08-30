@@ -2,13 +2,15 @@ import styled from "styled-components";
 import {COLORS as c} from "../../styles/colors";
 import Visibility from "../utils/blocks/Visibility";
 import {FadeInAni, FadeInTopDownAni} from "../utils/actions/Animations";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {ReactComponent as ToolTipIcon} from "../../assets/icons/icon-tooltip.svg";
 import {ReactComponent as CornIcon} from "../../assets/icons/icon-tip_corn.svg";
 import SizeBox from "../utils/blocks/SizeBox";
 
 const Wrapper = styled.div`
-    position: relative;
+  position: relative;
+  top: -7px;
+  left: -1px;
 `;
 
 const Container = styled.div`
@@ -55,7 +57,7 @@ const Title = styled.div`
   font-weight: 500;
 `;
 
-function ToolTip({title, ...props}) {
+function ToolTip({title = '', ...props}) {
     const [active, setActive] = useState(false);
 
     return (
@@ -63,7 +65,7 @@ function ToolTip({title, ...props}) {
             <Container
                 onMouseOver={() => setActive(true)}
                 onMouseOut={() => setActive(false)}>
-                <ToolTipIcon/>
+                <ToolTipIcon width={14} height={14}/>
                 <Visibility visibility={active}>
                     <div className={'f-row a-start j-start'}>
                         <AniWrapper/>

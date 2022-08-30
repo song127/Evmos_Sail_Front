@@ -2,6 +2,7 @@ import Web3 from "web3";
 import SmartContract from "../../datas/contracts/SubWallet.json";
 import {BLOCK_ACTION_TYPES} from "./blockchainReducer";
 import {DATA_TYPES} from "../data/dataReducer";
+import {WALLET_ERRORS} from "../../network/errors/WalletErrors";
 
 const connectRequest = () => {
     return {
@@ -50,7 +51,7 @@ export const connect = async () => {
                             NetworkData.address
                         );
 
-                        dispatch(
+                        await dispatch(
                             connectSuccess({
                                 account: accounts[0],
                                 smartContract: SmartContractObj,
@@ -80,16 +81,16 @@ export const connect = async () => {
                         };
                         // Add listeners end
                     } else {
-                        dispatch(connectFailed("Change network to Ethereum."));
+                        dispatch(connectFailed(WALLET_ERRORS.NONE_CONTRACT));
                     }
                 } else {
-                    dispatch(connectFailed("Change network to Kovan Network."));
+                    dispatch(connectFailed(WALLET_ERRORS.DIFF_NET));
                 }
             } catch (err) {
-                dispatch(connectFailed("Connect Rejected"));
+                dispatch(connectFailed(WALLET_ERRORS.REJECTED));
             }
         } else {
-            dispatch(connectFailed("Install Metamask."));
+            dispatch(connectFailed(WALLET_ERRORS.NOT_INSTALL));
         }
     };
 };

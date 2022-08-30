@@ -29,10 +29,10 @@ function App() {
                 <Header/>
                 <Routes>
                     <Route path={''} element={<Loading/>}/>
-                    <Route path={'/Connect'} element={<ConnectWallet/>}/>
-                    <Route path={'/Transaction'} element={<DepositAndWithdraw/>}/>
-                    <Route path={'/Short'} element={<ShortSelling/>}/>
-                    <Route path={'/Asset'} element={<CurrentAsset/>}/>
+                    <Route path={'/connect'} element={<ConnectWallet/>}/>
+                    <Route path={'/transaction'} element={<DepositAndWithdraw/>}/>
+                    <Route path={'/short'} element={<ShortSelling/>}/>
+                    <Route path={'/asset'} element={<CurrentAsset/>}/>
                 </Routes>
             </BodyInner>
         </>

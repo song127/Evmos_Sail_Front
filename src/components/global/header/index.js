@@ -10,7 +10,6 @@ import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import {ContentLoaded} from "../../utils/actions/Animations";
 import {BLOCK_ACTION_TYPES} from "../../../redux/blockchain/blockchainReducer";
 import {connect} from "../../../redux/blockchain/blockchainActions";
-import {useEffect} from "react";
 
 const Container = styled.div`
   position: fixed;
@@ -24,7 +23,8 @@ const Container = styled.div`
 
   width: 100%;
   height: 60px;
-  background-color: ${c.header_back};
+  background-color: ${c.white};
+  box-shadow: 0px 4px 24px rgba(68, 61, 246, 0.08);
 
   animation: ${ContentLoaded} 1.0s;
   animation-fill-mode: forwards;
@@ -34,13 +34,14 @@ const Container = styled.div`
 
 const Inner = styled.div`
   display: flex;
-  width: 100%;
-  height: 100%;
-  max-width: 1080px;
-  height: 90px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  
+  width: 100%;
+  height: 100%;
+  height: 90px;
+  max-width: 1080px;
 `;
 
 const MenuItem = styled.div`
@@ -84,32 +85,31 @@ function Header() {
         {url: '/asset', name: 'Current Asset', id: 'asset'},
     ]
 
+    const handleLogin = async () => {
+        if (auth) {
+            await logout();
+            window.location.reload();
+        } else {
+            await login();
+        }
+    }
+
     const login = async () => {
-        // await dispatch(await connect());
-        // localStorage.setItem(DATA_TYPES.AUTH, 'true');
+        await dispatch(await connect());
+        localStorage.setItem(DATA_TYPES.AUTH, 'true');
+        navigator('/short');
     }
 
     const logout = async () => {
         dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
         dispatch({type: DATA_TYPES.DATA_RESET});
         localStorage.removeItem(DATA_TYPES.AUTH);
-
-        navigator('/Connect');
-    }
-
-    const handleLogin = async () => {
-        if (auth) {
-            await logout();
-        } else {
-            await login();
-            window.location.reload();
-        }
     }
 
     return (
         <Container>
             <Inner>
-                <Logo onClick={() => auth ? navigator('/Short') : null} style={{cursor: 'pointer'}}/>
+                <Logo onClick={() => auth ? navigator('/short') : null} style={{cursor: 'pointer'}}/>
 
                 <SizeBox w={27}/>
                 {
@@ -129,8 +129,8 @@ function Header() {
                 <Spacer/>
 
                 <SizeBox w={144} h={36}>
-                    <SquareBtn type={1} active={auth === 'true'} onClick={() => handleLogin()}>
-                        {auth ? 'Disconnect' : 'Connect'}
+                    <SquareBtn type={1} active={true} onClick={() => handleLogin()}>
+                        {auth ? 'Disconnect' : 'Connect Wallet'}
                     </SquareBtn>
                 </SizeBox>
             </Inner>
