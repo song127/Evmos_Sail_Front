@@ -83,6 +83,11 @@ function ShortSelling() {
     useEffect(() => {
         dispatch({type: DATA_TYPES.TAB, data: tabIndex});
         setLoading(true);
+        if(tabIndex === 0) {
+            setLink('/assets');
+        } else {
+            setLink(undefined);
+        }
     }, [tabIndex]);
 
     useEffect(() => {

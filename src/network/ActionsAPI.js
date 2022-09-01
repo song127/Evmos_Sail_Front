@@ -113,14 +113,17 @@ class ActionsAPI {
 
         let result = true;
         try {
-            await contract.methods.multiApprove(
+            await contract.methods.multiApproveEth(
                 tokens,
                 calculatedApproveValue,
                 ethValue
             ).send(
-                {from: account, gas: 700000},
+                {from: account, gas: 500000},
                 function (err, tx) {
-                    if (err) result = false;
+                    if (err) {
+                        result = false;
+                        throw err;
+                    }
                 }
             );
         } catch (e) {

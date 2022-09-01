@@ -9,7 +9,7 @@ const BackBoard = styled.div`
   justify-content: space-evenly;
 
   border-radius: 48px;
-  border: 2px solid ${c.gray_4};
+  border: 2px solid ${c.gray_3};
 
   width: 100%;
   height: 50px;
@@ -34,7 +34,7 @@ const EmptyRoundBtn = styled.button`
   background-color: transparent;
 
   font-size: 14px;
-  color: ${c.gray_3};
+  color: ${c.gray};
 `;
 
 function RoundTab({list = [], index = 0, setIndex, ...props}) {

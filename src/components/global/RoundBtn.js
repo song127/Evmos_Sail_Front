@@ -10,7 +10,7 @@ const Container = styled.div`
   
   width: ${props => `${100 / props.length}%`};
   height: 50px;
-  background-color: ${c.blue_2};
+  background-color: ${c.blue_3};
   border-radius: 48px;
   
   color: ${c.white};

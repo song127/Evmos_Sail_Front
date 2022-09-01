@@ -15,6 +15,7 @@ import {useSelector} from "react-redux";
 import ActionsAPI from "../../../network/ActionsAPI";
 import {TokenAddress} from "../../../datas/Address";
 import BasicSquareBtn from "../BasicSquareBtn";
+import {LOG} from "../../../styles/utils";
 
 const Content = styled.div`
   display: flex;
@@ -81,6 +82,7 @@ function ApproveModal({setModal, daiApp = false, setDaiApp, ethApp = false, setE
         if(result) {
             setModal(false);
             setErr(1);
+            window.location.reload();
         } else {
             setErr(2);
         }

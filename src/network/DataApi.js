@@ -50,24 +50,13 @@ class DataApi {
     }
 
     getDepositDaiBalance = async (blockchain) => {
-        const web3 = blockchain.web3;
-        const account = blockchain.account;
-        const sub = await this.getSubWallet(blockchain);
-        const tokenAbi = TokenAbi;
+        const sub = await new DataApi().getSubWallet(blockchain)
 
-        // Create contract object
-        const tokenContractObj = new web3.eth.Contract(
-            tokenAbi,
-            TokenAddress.DAI
-        );
+        const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
-        const balance = await tokenContractObj.methods.balanceOf(sub).call(
-            {from: account},
-            function (error,) {
-                if (error) throw error;
-            }
-        );
-        const result = balance / web3.utils.toBN(10).pow(web3.utils.toBN(18));
+        const balance = await contract.methods.balance().call();
+
+        const result = balance / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
 
         return result;
     }
@@ -167,6 +156,7 @@ class DataApi {
     getShortData = async (blockchain) => {
         const account = blockchain.account;
         const sub = await new DataApi().getSubWallet(blockchain)
+        LOG(sub);
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
@@ -176,7 +166,6 @@ class DataApi {
     }
 
     getCollateralData = async (blockchain) => {
-        const account = blockchain.account;
         const sub = await new DataApi().getSubWallet(blockchain)
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
@@ -214,11 +203,26 @@ class DataApi {
         const account = blockchain.account;
         const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
 
-        const value = await contract.methods.WETH().call(
-            {from: account}
-        );
+        const value = await contract.methods.WETH().call();
 
         return value;
+    }
+
+    getApyETH = async (block) => {
+        const contract = await new ConnectorProvider().aaveConnector(block);
+        const wEthPath = await this.getWEthPath(block);
+
+        const reserveDataETH = await contract.methods.getReserveData(wEthPath).call();
+        const curBorrowRate = reserveDataETH['currentVariableBorrowRate'];
+        LOG(curBorrowRate);
+
+        const ray = 10**27;
+        const SECONDS_PER_YEAR = 31536000;
+
+        const varBorrowAPR = curBorrowRate / ray;
+        const varBorrowAPY = ((1 + (varBorrowAPR / SECONDS_PER_YEAR))**SECONDS_PER_YEAR) - 1;
+
+        return varBorrowAPY * 100;
     }
 
     getDaiEthRate = async (blockchain, mode) => { // 0: DAI > ETH // 1: ETH > DAI

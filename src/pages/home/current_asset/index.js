@@ -343,7 +343,7 @@ function CurrentAsset() {
                             <SizeBox w={8}/>
                             <H5>
                                 0,0000
-                                {/*{availableDAI.toFixed(4).replace('.', ',')}*/}
+                                {/*{availableDAI.toFixed(4)}*/}
                             </H5>
                         </div>
                     </SubValueBackBoard>

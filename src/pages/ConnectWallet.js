@@ -49,6 +49,8 @@ const stepBtn = [
     'Reconnect'
 ];
 
+let isDisconnected = false;
+
 function ConnectWallet() {
     const dispatch = useDispatch();
     const navigator = useNavigate();
@@ -60,7 +62,6 @@ function ConnectWallet() {
     const blockchain = useSelector(state => state.blockchain);
     const walletLoading = useSelector(state => state.blockchain.loading);
 
-    const [isNext, setIsNext] = useState(false);
     const [step, setStep] = useState(-1);
     const [loading, setLoading] = useState(true);
 
@@ -109,6 +110,7 @@ function ConnectWallet() {
         if (wallet !== 'false') {
             dispatch({type: BLOCK_ACTION_TYPES.SET_SUB_WALLET, data: wallet});
             setStep(2);
+            isDisconnected = true;
         } else {
             setStep(1);
         }
@@ -121,15 +123,14 @@ function ConnectWallet() {
             setStep(3);
         } else {
             setDaiApp(false);
-            setStep(2);
         }
     }
 
     useEffect(() => {
-        if(isNext) {
+        if(isDisconnected && step > 3) {
             reconnect();
         }
-    }, [isNext]);
+    }, []);
 
     const checkState = async () => {
         if (!auth && blockchain.account) {
@@ -176,7 +177,7 @@ function ConnectWallet() {
                 <Loading/> :
                 <>
                     {walletModal ?
-                        <WalletModal connect={walletConnectHandler} setLoading={setLoading} setModal={setWalletModal} setNext={setIsNext}/>
+                        <WalletModal connect={walletConnectHandler} setLoading={setLoading} setModal={setWalletModal}/>
                         : null}
                     {modal ? <ApproveModal setModal={setModal}
                                            daiApp={daiApp} setDaiApp={setDaiApp}

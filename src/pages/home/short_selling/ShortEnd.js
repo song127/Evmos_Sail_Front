@@ -2,22 +2,26 @@ import styled from "styled-components";
 import {COLORS as c} from "../../../styles/colors";
 import SizeBox from "../../../components/utils/blocks/SizeBox";
 import TokenInput, {TOKEN_INPUT_STATE} from "../../../components/global/TokenInput";
-import Selector from "../../../components/global/Selector";
 import BasicSquareBtn from "../../../components/global/BasicSquareBtn";
-import PercentBar from "../../../components/global/PercentBar";
-import {MESSAGE_TYPES} from "../../../components/global/ToastMessage";
-import SuccessMessageContent from "../../../components/global/SuccessMessageContent";
 import {CompleteTypes} from "./index";
 import {useEffect, useState} from "react";
 import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 import BorderButton from "../../../components/global/BorderButton";
-import {ReactComponent as Gas} from "../../../assets/icons/icon-gas-station.svg";
-import {ReactComponent as Heart} from "../../../assets/icons/icon-heart.svg";
+import {ReactComponent as Heart} from "../../../assets/icons/icon-green_heart.svg";
 import {useSelector} from "react-redux";
 import ActionsAPI from "../../../network/ActionsAPI";
 import DataApi from "../../../network/DataApi";
 import ToolTip from "../../../components/global/ToolTip";
 import Token from "../../../components/global/Token";
+import H5 from "../../../components/utils/texts/H5";
+import Sub1 from "../../../components/utils/texts/Sub1";
+import Spacer from "../../../components/utils/blocks/Spacer";
+import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
+import H4 from "../../../components/utils/texts/H4";
+import GasTracker from "../../../components/global/GasTracker";
+import Body1 from "../../../components/utils/texts/Body1";
+import SettingToolTip from "../../../components/global/SettingToolTip";
+import {LOG} from "../../../styles/utils";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -25,8 +29,8 @@ const Backboard_1 = styled.div`
   align-items: start;
   justify-content: start;
 
-  width: 500px;
-  height: 850px;
+  width: 100%;
+  height: max-content;
 
   background-color: ${c.white};
   border-radius: 16px;
@@ -42,12 +46,12 @@ const Backboard_2 = styled.div`
   justify-content: start;
 
   width: 500px;
-  height: 200px;
+  height: max-content;
 
   background-color: ${c.white};
   border-radius: 16px;
   box-sizing: border-box;
-  padding: 50px 60px;
+  padding: 37px 60px;
 `;
 
 const Title = styled.div`
@@ -64,13 +68,22 @@ const Title = styled.div`
 `;
 
 const SubTitle = styled.div`
+  cursor: pointer;
+
   width: max-content;
   height: max-content;
 
-  color: ${c.gray_3};
+  color: ${c.black};
   font-size: 14px;
   font-family: Montserrat;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 17px;
+`;
+
+const DashedDivider = styled.div`
+  width: 100%;
+  height: 0px;
+  border-top: 1.5px dashed ${c.gray_2};
 `;
 
 const itemList = ['DAI'];
@@ -85,12 +98,13 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     const actionApi = new ActionsAPI();
     const dataApi = new DataApi();
 
+    const [myBalance, setMyBalance] = useState(0.0);
+
     const [valid, setIsValid] = useState(false);
     const [profit, setProfit] = useState(0.0);
     const [interest, setInterest] = useState(0.0);
     const [nowCollateral, setNowCollateral] = useState(0.0);
     const [healthFactor, setHealthFactor] = useState(0.0);
-    const [gasFee, setGasFee] = useState(0.0);
 
     const [slippageIndex, setSlippageIndex] = useState(0);
 
@@ -123,6 +137,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     const getPrice = async () => {
         const daiP = await dataApi.getDaiEthRate(blockchain, 0);
         const ethP = await dataApi.getDaiEthRate(blockchain, 1);
+        if(!mounted) { return }
         setDaiPrice(daiP);
         setEthPrice(ethP);
 
@@ -134,10 +149,10 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     const getDatas = async () => {
         if(!mounted) { return }
         const shortData = await dataApi.getShortData(blockchain);
+        const myBalance = await dataApi.getDepositDaiBalance(blockchain);
         const ethValue = await getPrice();
         if(parseInt(shortData[1]) != 0) {
             const colData = await dataApi.getCollateralData(blockchain);
-            const gasFeeData = parseFloat(await blockchain.web3.eth.getGasPrice());
             const health = await dataApi.getHealth(blockchain);
 
             const shoData = shortData[1] / blockchain.web3.utils.toBN(10).pow(blockchain.web3.utils.toBN(18));
@@ -149,10 +164,6 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
             setIsValid(true);
             setProfit(initPrice - parseFloat(calcValue));
             setNowCollateral(colData);
-            setGasFee(
-                gasFeeData / blockchain.web3.utils.toBN(10)
-                    .pow(blockchain.web3.utils.toBN(9))
-            );
             setHealthFactor(health['healthFactor'] / (10**18));
         } else {
             if(!mounted) { return }
@@ -162,6 +173,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
             setNowCollateral(0);
             setHealthFactor(0);
         }
+        setMyBalance(myBalance);
     }
 
     useEffect(async () => {
@@ -179,146 +191,149 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
     return (
         <>
             <SizeBox h={30}/>
-            <div className={`row a-center j-start`}>
-                <Backboard_1>
-                    <Title>
-                        Current Profit
-                    </Title>
+            <div className={`all-f-row`}>
+                <div className={'all-f-column'}>
+                    <Backboard_1>
+                        <div className={'f-row a-center j-end'}>
+                            <SettingToolTip slip={slippageIndex} setSlip={setSlippageIndex}/>
+                        </div>
 
-                    <SizeBox h={30}/>
-                    <div className={'f-row a-end j-end'}>
-                        {priceIndex === 0 ?
-                            `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
-                            `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
-                        }
-                    </div>
+                        <SizeBox h={40}/>
+                        <H5>
+                            Current Profit
+                        </H5>
 
-                    <SizeBox h={8}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <TokenInput
-                            input={profit} disabled={true}
-                            state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
-                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                    </SizeBox>
+                        <SizeBox h={12}/>
+                        <SizeBox w={'100%'} h={60}>
+                            <TokenInput
+                                input={profit} disabled={true}
+                                state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
+                                btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
+                        </SizeBox>
 
-                    <SizeBox h={48}/>
-                    <Title>
-                        Accumulated Interest
-                    </Title>
+                        <SizeBox h={12}/>
+                        <div className={'f-row'}>
+                            <SubTitle onClick={getPrice}>
+                                {priceIndex === 0 ?
+                                    `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
+                                    `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
+                                }
+                            </SubTitle>
+                        </div>
 
-                    <SizeBox h={8}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <TokenInput
-                            input={interest} disabled={true}
-                            state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
-                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                    </SizeBox>
+                        <SizeBox h={50}/>
+                        <DashedDivider/>
 
-                    <SizeBox h={48}/>
-                    <Title>
-                        Your Collateral
-                    </Title>
+                        <SizeBox h={50}/>
+                        <div className={'f-row a-center'}>
+                            <Body1>
+                                Accumulated Interest
+                            </Body1>
 
-                    <SizeBox h={8}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <TokenInput
-                            input={nowCollateral} disabled={true}
-                            state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
-                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                    </SizeBox>
+                            <Spacer/>
+                            <DAI/>
 
-                    <SizeBox h={48}/>
-                    <Title>
-                        Slippage Tolerance
-                    </Title>
+                            <SizeBox w={8}/>
+                            <Body1>
+                                0.0
+                            </Body1>
+                        </div>
 
-                    <SizeBox h={30}/>
-                    <div className={'f-row'}>
-                        <BorderButton
-                            selected={slippageIndex === 0}
-                            onClick={() => setSlippageIndex(0)}>
-                            1%
-                        </BorderButton>
+                        <SizeBox h={20}/>
+                        <div className={'f-row a-center'}>
+                            <Body1>
+                                Your Collateral
+                            </Body1>
 
-                        <SizeBox w={18}/>
-                        <BorderButton
-                            selected={slippageIndex === 1}
-                            onClick={() => setSlippageIndex(1)}>
-                            3%
-                        </BorderButton>
-                    </div>
+                            <Spacer/>
+                            <DAI/>
 
-                    <SizeBox h={100}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <BasicSquareBtn active={valid} onClick={shortEndHandler}>
-                            Short End
-                        </BasicSquareBtn>
-                    </SizeBox>
-                </Backboard_1>
+                            <SizeBox w={8}/>
+                            <Body1>
+                                {nowCollateral.toFixed(1)}
+                            </Body1>
+                        </div>
 
-                <SizeBox w={20}/>
-                <SizeBox w={500} h={'100%'}>
-                    <div className={'all-f-column j-space'}>
-                        <Backboard_2>
-                            <Title>
-                                Total Profit
-                            </Title>
+                        <SizeBox h={130}/>
+                        <SizeBox w={'100%'} h={60}>
+                            <BasicSquareBtn active={valid} onClick={shortEndHandler}>
+                                Short End
+                            </BasicSquareBtn>
+                        </SizeBox>
 
-                            <SizeBox h={50}/>
-                            <div className={'f-row a-center'}>
-                                <DAI/>
+                        <SizeBox h={37}/>
+                    </Backboard_1>
+                </div>
 
-                                <SizeBox w={10}/>
-                                {profit}
-                            </div>
-                        </Backboard_2>
+                <SizeBox w={30}/>
+                <div className={'all-f-column j-start'}>
+                    <SubValueBackBoard style={{padding: '60px'}}>
+                        <H5>
+                            Subwallet Balance
+                        </H5>
 
-                        <SizeBox h={15}/>
-                        <Backboard_2>
-                            <Title>
-                                Established LTV
-                            </Title>
+                        <SizeBox h={16}/>
+                        <div className={'f-row a-center'}>
+                            <Sub1>
+                                Available To Short
+                            </Sub1>
 
-                            <SizeBox h={50}/>
-                            <TokenInput input={0}/>
-                        </Backboard_2>
+                            <Spacer/>
+                            <DAI/>
 
-                        <SizeBox h={15}/>
-                        <Backboard_2>
-                            <Title>
+                            <SizeBox w={8}/>
+                            <H5>
+                                {myBalance.toFixed(4)}
+                            </H5>
+                        </div>
+                    </SubValueBackBoard>
+
+                    <SizeBox h={20}/>
+                    <Backboard_2>
+                        <div className={'f-row a-center'}>
+                            <H5>
                                 Health Factor
-                            </Title>
+                            </H5>
 
-                            <SizeBox h={50}/>
-                            <div className={'f-row a-center'}>
-                                <Heart/>
+                            <SizeBox w={5}/>
+                            <ToolTip title={'Health Factor: '}>
+                                Your collateral X Max LTV Short / Token value
+                            </ToolTip>
 
-                                <SizeBox w={16}/>
-                                {healthFactor < 10000 ? healthFactor : '0.000'}
-                            </div>
-                        </Backboard_2>
+                            <Spacer/>
+                            <Heart/>
 
-                        <SizeBox h={15}/>
-                        <Backboard_2>
-                            <Title>
-                                Now Gas Price
+                            <SizeBox w={16}/>
+                            <H4 color={c.green}>
+                                {healthFactor.toFixed(4)}
+                            </H4>
+                        </div>
+                    </Backboard_2>
 
-                                <SizeBox w={5}/>
-                                <ToolTip title={'Gas Price'}>
+                    <SizeBox h={20}/>
+                    <Backboard_2>
+                        <div className={'f-row a-center'}>
+                            <H5>
+                                Established LTV
+                            </H5>
 
-                                </ToolTip>
-                            </Title>
+                            <SizeBox w={5}/>
+                            <ToolTip title={'Established LTV: '}>
+                                Your collateral X Max LTV Short / Token value
+                            </ToolTip>
 
-                            <SizeBox h={50}/>
-                            <div className={'f-row a-center'}>
-                                <Gas/>
+                            <Spacer/>
+                            <H4 color={c.gray_2}>
+                                0.0 %
+                            </H4>
+                        </div>
+                    </Backboard_2>
 
-                                <SizeBox w={16}/>
-                                {gasFee}
-                            </div>
-                        </Backboard_2>
-                    </div>
-                </SizeBox>
+                    <SizeBox h={20}/>
+                    <Backboard_2>
+                        <GasTracker/>
+                    </Backboard_2>
+                </div>
             </div>
         </>
     );

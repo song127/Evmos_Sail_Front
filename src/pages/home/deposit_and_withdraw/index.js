@@ -93,7 +93,19 @@ function DepositAndWithdraw() {
 
     const inputTokenOnchange = (e) => {
         setRatio(0);
-        setInputToken(e.target.value);
+        if(tabIndex === 0) {
+            if(e.target.value === '' || e.target.value === 'NaN' || parseFloat(e.target.value) <= availableDAI) {
+                setInputToken(e.target.value);
+            } else {
+                setInputToken(availableDAI.toString());
+            }
+        } else if (tabIndex === 1) {
+            if(e.target.value === '' || e.target.value === 'NaN' || parseFloat(e.target.value) <= myBalance) {
+                setInputToken(e.target.value);
+            } else {
+                setInputToken(myBalance.toString());
+            }
+        }
     }
 
     const macroHandler = (value) => {
@@ -225,7 +237,7 @@ function DepositAndWithdraw() {
 
                                 <SizeBox w={8}/>
                                 <H5>
-                                    {availableDAI.toFixed(4).replace('.', ',')}
+                                    {availableDAI.toFixed(4)}
                                 </H5>
                             </div> :
                             <>
@@ -239,7 +251,7 @@ function DepositAndWithdraw() {
 
                                     <SizeBox w={8}/>
                                     <H5>
-                                        {myBalance.toFixed(4).replace('.', ',')}
+                                        {myBalance.toFixed(4)}
                                     </H5>
                                 </div>
 
@@ -254,7 +266,7 @@ function DepositAndWithdraw() {
                                     <SizeBox w={8}/>
                                     <H5>
                                         0,0000
-                                        {/*{availableDAI.toFixed(4).replace('.', ',')}*/}
+                                        {/*{availableDAI.toFixed(4)}*/}
                                     </H5>
                                 </div>
                             </>

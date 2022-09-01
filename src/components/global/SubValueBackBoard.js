@@ -17,7 +17,7 @@ const Container = styled.div`
 
 function SubValueBackBoard({...props}) {
     return (
-      <Container>
+      <Container style={props.style}>
           {props.children}
       </Container>
     );

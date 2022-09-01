@@ -8,7 +8,7 @@ import styled from "styled-components";
 import {COLORS as c} from "../../../styles/colors";
 import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 import {ReactComponent as Heart} from "../../../assets/icons/icon-green_heart.svg";
-import {ReactComponent as Gas} from "../../../assets/icons/icon-gas-station.svg";
+import {ReactComponent as Good} from "../../../assets/icons/icon-good_imo.svg";
 import {ReactComponent as LT} from "../../../assets/images/image-LT.svg";
 import {ReactComponent as MaxLTV} from "../../../assets/images/image-max_ltv.svg";
 import {CompleteTypes} from "./index";
@@ -21,6 +21,13 @@ import ToolTip from "../../../components/global/ToolTip";
 import {TokenAddress} from "../../../datas/Address";
 import {LOG} from "../../../styles/utils";
 import Token from "../../../components/global/Token";
+import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
+import H5 from "../../../components/utils/texts/H5";
+import Sub1 from "../../../components/utils/texts/Sub1";
+import Spacer from "../../../components/utils/blocks/Spacer";
+import SettingToolTip from "../../../components/global/SettingToolTip";
+import H4 from "../../../components/utils/texts/H4";
+import GasTracker from "../../../components/global/GasTracker";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -29,12 +36,12 @@ const Backboard_1 = styled.div`
   justify-content: start;
 
   width: 500px;
-  height: 850px;
+  height: max-content;
 
   background-color: ${c.white};
   border-radius: 16px;
   box-sizing: border-box;
-  padding: 50px 60px;
+  padding: 46px 60px;
 `;
 
 // Sub
@@ -45,12 +52,12 @@ const Backboard_2 = styled.div`
   justify-content: start;
 
   width: 500px;
-  height: 270px;
+  height: max-content;
 
   background-color: ${c.white};
   border-radius: 16px;
   box-sizing: border-box;
-  padding: 50px 60px;
+  padding: 37px 60px;
 `;
 
 const Title = styled.div`
@@ -74,24 +81,25 @@ const SubTitle = styled.div`
   width: max-content;
   height: max-content;
 
-  color: ${c.gray_3};
+  color: ${c.black};
   font-size: 14px;
   font-family: Montserrat;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 17px;
 `;
 
 const LTImg = styled(LT)`
   position: absolute;
 
-  top: 300px;
+  top: 320px;
   right: 60px;
 `;
 
 const LTVImg = styled(MaxLTV)`
   position: absolute;
 
-  top: 410px;
-  right: 213px;
+  top: 425px;
+  right: 214.5px;
 `;
 
 const PerBorder = styled.div`
@@ -134,7 +142,11 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     const collateralTokenRef = useRef(null);
     const [collateralToken, setCollateralToken] = useState('');
     const collateralTokenOnchange = (e) => {
-        setCollateralToken(e.target.value);
+        if(e.target.value === '' || e.target.value === 'NaN' || parseFloat(e.target.value) < myBalance) {
+            setCollateralToken(e.target.value);
+        } else {
+            setCollateralToken(myBalance.toString());
+        }
     }
     const macroHandler = (value) => {
         setRatioValue(value);
@@ -201,7 +213,6 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
 
     // datas
     const [healthFactor, setHealthFactor] = useState(0);
-    const [gasFee, setGasFee] = useState(0);
     const [apy, setApy] = useState(0);
 
     const multiApproveAll = async () => {
@@ -254,6 +265,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     const getPrice = async () => {
         const daiP = await dataApi.getDaiEthRate(blockchain, 0);
         const ethP = await dataApi.getDaiEthRate(blockchain, 1);
+        if(!mounted) { return }
         setDaiPrice(daiP);
         setEthPrice(ethP);
 
@@ -267,6 +279,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
             await getPrice();
             const gasFeeData = parseFloat(await blockchain.web3.eth.getGasPrice());
             const health = await dataApi.getHealth(blockchain);
+            const apyEth = await dataApi.getApyETH(blockchain);
             // const totalBEth = health['totalCollateralETH'];
             // const ltv = 8000;
             // const debtEth = health['totalDebtETH'];
@@ -274,13 +287,13 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
             // console.log(factor);
 
             if(!mounted) { return }
-            setGasFee(
-                gasFeeData / blockchain.web3.utils.toBN(10)
-                    .pow(blockchain.web3.utils.toBN(9))
-            );
             setMyBalance(myBalance);
-            setApy(27.4);
-            setHealthFactor(health['healthFactor'] / (10 ** 18));
+            setApy(apyEth);
+            if(parseFloat(shorted[1]) !== 0.0) {
+                setHealthFactor(health['healthFactor'] / (10 ** 18));
+            } else {
+                setHealthFactor(0);
+            }
 
             setApproveLoading(true);
             if (await dataApi.isApprovedBorrowEth(blockchain)) {
@@ -323,159 +336,136 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
             {/* LEFT */}
             <SizeBox h={30}/>
             <div className={`all-f-row`}>
-                <Backboard_1>
-                    <Title>
-                        Collateral
-                    </Title>
+                <div className={'f-column'}>
+                    <SubValueBackBoard>
+                        <H5>
+                            Subwallet Balance
+                        </H5>
 
-                    <SizeBox h={30}/>
-                    <div className={'f-row a-end j-end'}>
-                        <SubTitle>
-                            Current my balance : {myBalance.toFixed(4)} DAI
-                        </SubTitle>
-                    </div>
+                        <SizeBox h={16}/>
+                        <div className={'f-row a-center'}>
+                            <Sub1>
+                                Available To Short
+                            </Sub1>
 
-                    <SizeBox h={8}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <TokenInput
-                            ref={collateralTokenRef} input={collateralToken}
-                            disabled={false}
-                            state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
-                            onChange={collateralTokenOnchange}
-                            btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
-                    </SizeBox>
+                            <Spacer/>
+                            <DAI/>
 
-                    <SizeBox h={30}/>
-                    <div className={'f-row'}>
-                        <BorderButton
-                            selected={ratioValue === 50}
-                            onClick={() => macroHandler(50)}>
-                            50%
-                        </BorderButton>
+                            <SizeBox w={8}/>
+                            <H5>
+                                {myBalance.toFixed(4)}
+                            </H5>
+                        </div>
+                    </SubValueBackBoard>
 
-                        <SizeBox w={18}/>
-                        <BorderButton
-                            selected={ratioValue === 100}
-                            onClick={() => macroHandler(100)}>
-                            Max
-                        </BorderButton>
-                    </div>
+                    <SizeBox h={20}/>
+                    <Backboard_1>
+                        <div className={'f-row j-end'}>
+                            <SettingToolTip slip={slippageIndex} setSlip={setSlippageIndex}/>
+                        </div>
 
-                    <SizeBox h={24}/>
-                    <Title>
-                        Short
-                    </Title>
+                        <SizeBox h={20}/>
+                        <H5>
+                            Set Collateral
+                        </H5>
 
-                    <SizeBox h={10}/>
-                    <div className={'f-row a-end j-end'}>
-                        <SubTitle onClick={getPrice}>
-                            {priceIndex === 0 ?
-                                `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
-                                `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
-                            }
-                        </SubTitle>
-                    </div>
+                        <SizeBox h={24}/>
+                        <SizeBox w={'100%'} h={60}>
+                            <TokenInput
+                                ref={collateralTokenRef} input={collateralToken}
+                                disabled={false}
+                                state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
+                                onChange={collateralTokenOnchange}
+                                btn={<Token><DAI/><SizeBox w={10}/>DAI</Token>}/>
+                        </SizeBox>
 
-                    <SizeBox h={8}/>
-                    <SizeBox w={'100%'} h={60}>
-                        <TokenInput
-                            ref={shortTokenRef} input={shortToken}
-                            disabled={false}
-                            state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
-                            onChange={shortTokenOnchange}
-                            btn={
-                                <SizeBox w={150} h={60}>
-                                    <Selector list={shorItemList} index={shortTokenIndex}
-                                              setIndex={setShortTokenIndex}/>
-                                </SizeBox>}/>
-                    </SizeBox>
+                        <SizeBox h={30}/>
+                        <div className={'f-row'}>
+                            <BorderButton
+                                selected={ratioValue === 50}
+                                onClick={() => macroHandler(50)}>
+                                50%
+                            </BorderButton>
 
-                    <SizeBox h={48}/>
-                    <Title>
-                        APY (variable)
-                        <SizeBox w={5}/>
-                        <ToolTip title={'What is different btw stable and variable APY?'}>
-                            Stable act as a fixed rated in the short-term,
-                            but can be re-balanced in the long-term in response to
-                            changes in market conditions. The variable rate is the
-                            rate based on the offer and demand in our protocol.
-                            Also it will change over the time and could be optimal
-                            rate depending on market conditions.
-                        </ToolTip>
-                        <div className={'f-row a-end j-end'}>
-                            <SubTitle>
-                                {apy} %
+                            <SizeBox w={18}/>
+                            <BorderButton
+                                selected={ratioValue === 100}
+                                onClick={() => macroHandler(100)}>
+                                Max
+                            </BorderButton>
+                        </div>
+
+                        <SizeBox h={38}/>
+                        <H5>
+                            Set Short Token Ratio
+                        </H5>
+
+                        <SizeBox h={24}/>
+                        <SizeBox w={'100%'} h={60}>
+                            <TokenInput
+                                ref={shortTokenRef} input={shortToken}
+                                disabled={false}
+                                state={TOKEN_INPUT_STATE.DEFAULT} holder={'0.0000'}
+                                onChange={shortTokenOnchange}
+                                btn={
+                                    <SizeBox w={150} h={60}>
+                                        <Selector list={shorItemList} index={shortTokenIndex}
+                                                  setIndex={setShortTokenIndex}/>
+                                    </SizeBox>}/>
+                        </SizeBox>
+
+                        <SizeBox h={10}/>
+                        <div className={'f-row'}>
+                            <SubTitle onClick={getPrice}>
+                                {priceIndex === 0 ?
+                                    `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
+                                    `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
+                                }
                             </SubTitle>
                         </div>
-                    </Title>
 
-                    <SizeBox h={48}/>
-                    <Title>
-                        Slippage Tolerance
-
-                        <SizeBox w={5}/>
-                        <ToolTip title={'Slippage Tolerance :'}>
-                            Your transaction will revert if the price
-                            changes unfavorably by more than this percentage.
-                        </ToolTip>
-                    </Title>
-
-                    <SizeBox h={30}/>
-                    <div className={'f-row'}>
-                        <BorderButton
-                            selected={slippageIndex === 0}
-                            onClick={() => setSlippageIndex(0)}>
-                            1%
-                        </BorderButton>
-
-                        <SizeBox w={18}/>
-                        <BorderButton
-                            selected={slippageIndex === 1}
-                            onClick={() => setSlippageIndex(1)}>
-                            3%
-                        </BorderButton>
-                    </div>
-
-                    <SizeBox h={48}/>
-                    <SizeBox w={'100%'} h={60}>
-                        {
-                            approveLoading ?
-                                <BasicSquareBtn
-                                    active={true}
-                                    onClick={() => {
-                                    }}>
-                                    Loading
-                                </BasicSquareBtn> :
-                                <>
+                        <SizeBox h={62}/>
+                        <SizeBox w={'100%'} h={60}>
+                            {
+                                approveLoading ?
                                     <BasicSquareBtn
-                                        active={isValid || approveCount === 0}
+                                        active={true}
                                         onClick={() => {
-                                            if (approveCount === 0) {
-                                                multiApproveAll();
-                                            } else {
-                                                shortStartHandler();
-                                            }
                                         }}>
-                                        {
-                                            isValid ? 'Short Start' : 'Enter an amount'
-                                        }
-                                    </BasicSquareBtn>
-                                </>
-                        }
-                    </SizeBox>
-                </Backboard_1>
+                                        Loading
+                                    </BasicSquareBtn> :
+                                    <>
+                                        <BasicSquareBtn
+                                            active={isValid || approveCount === 0}
+                                            onClick={() => {
+                                                if (approveCount === 0) {
+                                                    multiApproveAll();
+                                                } else {
+                                                    shortStartHandler();
+                                                }
+                                            }}>
+                                            {
+                                                isValid ? 'Short Start' : 'Enter an amount'
+                                            }
+                                        </BasicSquareBtn>
+                                    </>
+                            }
+                        </SizeBox>
+                    </Backboard_1>
+                </div>
 
                 {/* RIGHT */}
                 <SizeBox w={20}/>
                 <SizeBox w={500} h={'100%'}>
                     <div className={'all-f-column j-space'}>
                         <Backboard_2>
-                            <Title>
-                                Your LTV
-                            </Title>
+                            <H5>
+                                My LTV
+                            </H5>
+
                             <LTImg/>
 
-                            <SizeBox h={30}/>
+                            <SizeBox h={50}/>
                             <PerBorder>
                                 {barValue} %
                             </PerBorder>
@@ -485,50 +475,54 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
                                         step={0.1} min={0} max={50}/>
 
                             <LTVImg/>
+
+                            <SizeBox h={80}/>
                         </Backboard_2>
 
                         <SizeBox h={20}/>
                         <Backboard_2>
-                            <Title>
-                                Health Factor
+                            <div className={'f-row a-center'}>
+                                <H5>
+                                    Health Factor
+                                </H5>
 
                                 <SizeBox w={5}/>
                                 <ToolTip title={'Health Factor: '}>
                                     Your collateral X Max LTV Short / Token value
                                 </ToolTip>
-                            </Title>
 
-                            <SizeBox h={60}/>
-                            <div className={'f-row a-center'}>
+                                <Spacer/>
                                 <Heart/>
 
                                 <SizeBox w={16}/>
-                                {healthFactor < 10000 ? healthFactor : '0.000'}
+                                <H4 color={c.green}>
+                                    {healthFactor.toFixed(4)}
+                                </H4>
                             </div>
                         </Backboard_2>
 
                         <SizeBox h={20}/>
                         <Backboard_2>
-                            <Title>
-                                Now Gas Price
+                            <div className={'f-row a-center'}>
+                                <H5>
+                                    APY (Variable, Short token)
+                                </H5>
 
                                 <SizeBox w={5}/>
-                                <ToolTip title={'Estimated Gas fee : '}>
-                                    From deposit to withdraw,
-                                    each network usage fee you use
-                                    will be calculated differently
-                                    depending on the overall network
-                                    (currently Ethereum) usage.
+                                <ToolTip title={'APY: '}>
+                                    Your collateral X Max LTV Short / Token value
                                 </ToolTip>
-                            </Title>
 
-                            <SizeBox h={60}/>
-                            <div className={'f-row a-center'}>
-                                <Gas/>
-
-                                <SizeBox w={16}/>
-                                {gasFee.toFixed(6)}
+                                <Spacer/>
+                                <H4 color={c.gray_2}>
+                                    {apy.toFixed(2)} %
+                                </H4>
                             </div>
+                        </Backboard_2>
+
+                        <SizeBox h={20}/>
+                        <Backboard_2>
+                            <GasTracker/>
                         </Backboard_2>
                     </div>
                 </SizeBox>

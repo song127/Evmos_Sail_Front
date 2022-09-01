@@ -9,7 +9,7 @@ const Box = styled.button`
   justify-content: center;
 
   width: 100%;
-  height: 50px;
+  height: 48px;
   border-radius: 8px;
   border: 1.5px solid ${p => p.selected ? c.blue_2 : c.gray_3};
   background-color: ${c.white};

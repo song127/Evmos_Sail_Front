@@ -9,8 +9,7 @@ import SizeBox from "../utils/blocks/SizeBox";
 
 const Wrapper = styled.div`
   position: relative;
-  top: -7px;
-  left: -1px;
+  top: 2px;
 `;
 
 const Container = styled.div`
@@ -61,11 +60,10 @@ function ToolTip({title = '', ...props}) {
     const [active, setActive] = useState(false);
 
     return (
-        <Wrapper>
-            <Container
-                onMouseOver={() => setActive(true)}
-                onMouseOut={() => setActive(false)}>
-                <ToolTipIcon width={14} height={14}/>
+        <Wrapper onMouseOver={() => setActive(true)}
+                 onMouseOut={() => setActive(false)}>
+            <ToolTipIcon width={14} height={14}/>
+            <Container>
                 <Visibility visibility={active}>
                     <div className={'f-row a-start j-start'}>
                         <AniWrapper/>

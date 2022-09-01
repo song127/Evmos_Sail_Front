@@ -16,7 +16,7 @@ const BackBoard = styled.div`
   justify-content: start;
 
   width: 100%;
-  max-width: 600px;
+  max-width: 400px;
   height: max-content;
 
   background: ${c.white};
