@@ -2,7 +2,6 @@ import "./App.css";
 import React from "react";
 import {Route, Routes} from "react-router-dom";
 import styled from "styled-components";
-import {useSelector} from "react-redux";
 import ScrollToTop from "./components/utils/actions/ScrollTop";
 import Header from "./components/global/header";
 import DepositAndWithdraw from "./pages/home/deposit_and_withdraw";
@@ -11,6 +10,7 @@ import CurrentAsset from "./pages/home/current_asset";
 import CheckConnect from "./components/utils/actions/CheckConnect";
 import ConnectWallet from "./pages/ConnectWallet";
 import Loading from "./pages/Loading";
+import Test from "./pages/Test";
 
 const BodyInner = styled.div`
   display: flex;
@@ -33,6 +33,7 @@ function App() {
                     <Route path={'/transaction'} element={<DepositAndWithdraw/>}/>
                     <Route path={'/short'} element={<ShortSelling/>}/>
                     <Route path={'/asset'} element={<CurrentAsset/>}/>
+                    <Route path={'/test'} element={<Test/>}/>
                 </Routes>
             </BodyInner>
         </>

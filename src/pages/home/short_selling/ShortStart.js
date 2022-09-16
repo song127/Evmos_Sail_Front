@@ -8,7 +8,6 @@ import styled from "styled-components";
 import {COLORS as c} from "../../../styles/colors";
 import {ReactComponent as DAI} from "../../../assets/icons/tokens/icon-dai.svg";
 import {ReactComponent as Heart} from "../../../assets/icons/icon-green_heart.svg";
-import {ReactComponent as Good} from "../../../assets/icons/icon-good_imo.svg";
 import {ReactComponent as LT} from "../../../assets/images/image-LT.svg";
 import {ReactComponent as MaxLTV} from "../../../assets/images/image-max_ltv.svg";
 import {CompleteTypes} from "./index";
@@ -19,7 +18,6 @@ import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import DataApi from "../../../network/DataApi";
 import ToolTip from "../../../components/global/ToolTip";
 import {TokenAddress} from "../../../datas/Address";
-import {LOG} from "../../../styles/utils";
 import Token from "../../../components/global/Token";
 import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
 import H5 from "../../../components/utils/texts/H5";
@@ -28,6 +26,8 @@ import Spacer from "../../../components/utils/blocks/Spacer";
 import SettingToolTip from "../../../components/global/SettingToolTip";
 import H4 from "../../../components/utils/texts/H4";
 import GasTracker from "../../../components/global/GasTracker";
+import Sub2 from "../../../components/utils/texts/Sub2";
+import {LOG} from "../../../styles/utils";
 
 const Backboard_1 = styled.div`
   display: flex;
@@ -91,15 +91,15 @@ const SubTitle = styled.div`
 const LTImg = styled(LT)`
   position: absolute;
 
-  top: 320px;
-  right: 60px;
+  top: 300px;
+  right: 103px;
 `;
 
 const LTVImg = styled(MaxLTV)`
   position: absolute;
 
-  top: 425px;
-  right: 214.5px;
+  top: 420px;
+  right: 189px;
 `;
 
 const PerBorder = styled.div`
@@ -155,6 +155,11 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     }
 
     useEffect(() => {
+        if(collateralToken.includes('e')) {
+            setCollateralToken('0.0000000');
+            return;
+        }
+        if(collateralToken === '0.0000000') { return }
         if (actionApi.checkNumber(dataApi.toFixed(collateralToken))) {
             const ratio = parseFloat(collateralToken) * 100 / myBalance;
             setRatioValue(ratio);
@@ -181,7 +186,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     }
 
     useEffect(() => {
-        const data = (parseFloat(collateralToken) * daiPrice * barValue / 100).toString();
+        const data = (parseFloat(collateralToken) * (daiPrice / (10**18)) * barValue / 100).toString();
         if (data !== 'NaN') {
             const fixed = parseFloat(data).toFixed(14).toString();
             setShortToken(fixed);
@@ -191,7 +196,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     }, [collateralToken]);
 
     useEffect(() => {
-        const data = (parseFloat(collateralToken) * daiPrice * barValue / 100).toString();
+        const data = (parseFloat(collateralToken) * (daiPrice / (10**18)) * barValue / 100).toString();
         if (data !== 'NaN') {
             const fixed = parseFloat(data).toFixed(14).toString();
             setShortToken(fixed);
@@ -204,7 +209,14 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
         const colValid = actionApi.checkNumber(dataApi.toFixed(collateralToken));
         const shortValid = actionApi.checkNumber(dataApi.toFixed(shortToken));
 
-        return colValid && shortValid;
+        let cValue = false;
+        let sValue = false;
+        if(parseFloat(collateralToken) && parseFloat(shortToken)) {
+            cValue = parseFloat(collateralToken) !== 0;
+            sValue = parseFloat(shortToken) !== 0;
+        }
+
+        return (colValid && shortValid) || (cValue && sValue);
     }
 
     useEffect(() => {
@@ -237,9 +249,8 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
         setLoadingModal(true);
         const result = await actionApi.shortStartW(blockchain, collateralToken, shortToken);
         if (result) {
-            setTitle('Successfully completed Short start');
-            setContent('Short Start requirement has been sent to our server successfully.\n' +
-                'Good to go, bro!');
+            setTitle('Short start completed successfully');
+            setContent('Short Start requirement has been sent to our server successfully.\nGood to go, bro!');
             setLink(undefined);
             modalHandler();
             await getDatas().then(() => {
@@ -260,13 +271,15 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
     }
 
     const [priceIndex, setPriceIndex] = useState(1);
+    const [daiSwapPrice, setSwapDaiPrice] = useState(0.0);
     const [daiPrice, setDaiPrice] = useState(0.0);
     const [ethPrice, setEthPrice] = useState(0.0);
     const getPrice = async () => {
         const daiP = await dataApi.getDaiEthRate(blockchain, 0);
         const ethP = await dataApi.getDaiEthRate(blockchain, 1);
+
         if(!mounted) { return }
-        setDaiPrice(daiP);
+        setSwapDaiPrice(daiP);
         setEthPrice(ethP);
 
         setPriceIndex(priceIndex === 0 ? 1 : 0);
@@ -274,19 +287,15 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
 
     const getDatas = async () => {
         if (blockchain.account) {
+            const daiPriceData = await dataApi.getTokenPrice(blockchain, TokenAddress.DAI);
             const shorted = await dataApi.getShortData(blockchain);
             const myBalance = await dataApi.getDepositDaiBalance(blockchain);
             await getPrice();
-            const gasFeeData = parseFloat(await blockchain.web3.eth.getGasPrice());
             const health = await dataApi.getHealth(blockchain);
             const apyEth = await dataApi.getApyETH(blockchain);
-            // const totalBEth = health['totalCollateralETH'];
-            // const ltv = 8000;
-            // const debtEth = health['totalDebtETH'];
-            // const factor = totalBEth * ltv / debtEth;
-            // console.log(factor);
 
             if(!mounted) { return }
+            setDaiPrice(parseFloat(daiPriceData));
             setMyBalance(myBalance);
             setApy(apyEth);
             if(parseFloat(shorted[1]) !== 0.0) {
@@ -337,7 +346,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
             <SizeBox h={30}/>
             <div className={`all-f-row`}>
                 <div className={'f-column'}>
-                    <SubValueBackBoard>
+                    <SubValueBackBoard style={{maxWidth: '500px'}}>
                         <H5>
                             Subwallet Balance
                         </H5>
@@ -418,7 +427,7 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
                         <div className={'f-row'}>
                             <SubTitle onClick={getPrice}>
                                 {priceIndex === 0 ?
-                                    `1 DAI ≈ ${daiPrice.toFixed(8)} ETH` :
+                                    `1 DAI ≈ ${daiSwapPrice.toFixed(8)} ETH` :
                                     `1 ETH ≈ ${ethPrice.toFixed(3)} DAI`
                                 }
                             </SubTitle>
@@ -474,9 +483,21 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
                             <PercentBar value={barValue} onChange={onChangeBar}
                                         step={0.1} min={0} max={50}/>
 
+                            <SizeBox h={10}/>
+                            <div className={'f-row'}>
+                                <Sub2 color={c.green}>
+                                    Safer
+                                </Sub2>
+
+                                <Spacer/>
+                                <Sub2 color={c.red}>
+                                    Risker
+                                </Sub2>
+                            </div>
+
                             <LTVImg/>
 
-                            <SizeBox h={80}/>
+                            <SizeBox h={54}/>
                         </Backboard_2>
 
                         <SizeBox h={20}/>
@@ -488,7 +509,8 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
 
                                 <SizeBox w={5}/>
                                 <ToolTip title={'Health Factor: '}>
-                                    Your collateral X Max LTV Short / Token value
+                                    Health factor= Σ collateral in ETH * Liquidation Threshold / Σ Short Token value in ETH.
+                                    Auto protecting asset function runs at ≈ 1.0
                                 </ToolTip>
 
                                 <Spacer/>
@@ -509,12 +531,14 @@ function ShortStart({setLoading, setTitle, setContent, setLink, setModal, setTyp
                                 </H5>
 
                                 <SizeBox w={5}/>
-                                <ToolTip title={'APY: '}>
-                                    Your collateral X Max LTV Short / Token value
+                                <ToolTip title={'APY type variable :'}>
+                                    The variable rate is the rate based on the offer and demand in our protocol.
+                                    <br/>
+                                    Also it will change over the time and could be optimal rate depending on market conditions.
                                 </ToolTip>
 
                                 <Spacer/>
-                                <H4 color={c.gray_2}>
+                                <H4 color={apy > 0 ? c.font_color : c.gray_2}>
                                     {apy.toFixed(2)} %
                                 </H4>
                             </div>

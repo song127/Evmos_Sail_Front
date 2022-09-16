@@ -21,9 +21,9 @@ const Container = styled.div`
 
 const Content = styled.div`
   position: relative;
-  z-index: 1004;
-  top: -1px;
-  left: -10px;
+  z-index: 2000;
+  top: -2px;
+  left: -11px;
 
   display: flex;
   flex-direction: column;
@@ -63,6 +63,7 @@ function ToolTip({title = '', ...props}) {
         <Wrapper onMouseOver={() => setActive(true)}
                  onMouseOut={() => setActive(false)}>
             <ToolTipIcon width={14} height={14}/>
+
             <Container>
                 <Visibility visibility={active}>
                     <div className={'f-row a-start j-start'}>

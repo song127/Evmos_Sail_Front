@@ -55,7 +55,7 @@ const stateDesc = [
     'Connecting wallet failed.\nPlease try again.'
 ];
 
-function WalletModal({setModal, setLoading, connect, ...props}) {
+function WalletModal({next, setModal, setLoading, connect, ...props}) {
     const block = useSelector(state1 => state1.blockchain);
     const state = useSelector(state1 => state1.blockchain.error);
     const loading = useSelector(state1 => state1.blockchain.loading);
@@ -64,6 +64,7 @@ function WalletModal({setModal, setLoading, connect, ...props}) {
         if(block.account) {
             setModal(false);
             setLoading(true);
+            next = true;
         }
     }, [block.account]);
 

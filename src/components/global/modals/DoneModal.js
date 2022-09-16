@@ -7,12 +7,15 @@ import {CompleteTypes, ModalOptions} from "../../../pages/home/short_selling";
 import {Link} from "react-router-dom";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import {useDispatch} from "react-redux";
+import H4 from "../../utils/texts/H4";
+import Body1 from "../../utils/texts/Body1";
+import Body0 from "../../utils/texts/Body0";
 
 const BackBoard = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: center;
   justify-content: start;
 
   width: 100%;
@@ -29,26 +32,6 @@ const BackBoard = styled.div`
   animation-fill-mode: forwards;
 `;
 
-const Title = styled.div`
-  align-self: start;
-
-  font-family: Montserrat;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 22px;
-`;
-
-const Desc = styled.div`
-  font-family: Montserrat;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 22px;
-
-  color: ${c.font_color};
-`;
-
 const Btn = styled.button`
   cursor: pointer;
 
@@ -61,10 +44,13 @@ const Btn = styled.button`
 
   background-color: ${props => props.yes ? c.blue_2 : c.white};
   border-radius: 8px;
-  border: ${props => props.yes ? null : `2px solid ${c.gray_2}`};
+  border: ${props => props.yes ? null : `2px solid ${c.gray_3}`};
 
-  color: ${props => props.yes ? c.white : c.font_color};
+  font-style: normal;
+  font-weight: 500;
   font-size: 12px;
+  line-height: 15px;
+  color: ${props => props.yes ? c.white : c.font_color};
 `;
 
 function DoneModal({title, content, setModal, type, link, ...props}) {
@@ -72,14 +58,14 @@ function DoneModal({title, content, setModal, type, link, ...props}) {
     return (
         <ModalWrapper>
             <BackBoard>
-                <Title>
+                <H4>
                     {title}
-                </Title>
+                </H4>
 
                 <SizeBox h={12}/>
-                <Desc>
+                <Body0>
                     {content}
-                </Desc>
+                </Body0>
 
                 <SizeBox h={40}/>
                 {link != undefined ? <div className={'f-row j-space'}>

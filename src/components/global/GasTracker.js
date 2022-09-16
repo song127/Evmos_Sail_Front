@@ -11,7 +11,7 @@ import Spacer from "../utils/blocks/Spacer";
 const UpdateBack = styled.div`
   display: flex;
   align-items: center;
-  
+
   width: 100%;
   height: 28px;
 
@@ -32,20 +32,24 @@ function GasTracker() {
 
     const [gasFee, setGasFee] = useState(0.0);
     const [sec, setSec] = useState(0);
+    let mounted = true;
     let secV = 0
 
     useEffect(async () => {
         const gasFeeData = parseFloat(await web3.eth.getGasPrice());
+        if (!mounted) return;
         setGasFee(gasFeeData / web3.utils.toBN(10)
             .pow(web3.utils.toBN(9)));
         setInterval(async () => {
             if (secV >= 10) {
+                if(!mounted) return;
                 const gasFeeData = parseFloat(await web3.eth.getGasPrice());
                 setGasFee(gasFeeData / web3.utils.toBN(10)
                     .pow(web3.utils.toBN(9)));
                 secV = 0;
                 setSec(0);
             }
+            if(!mounted) return;
             secV += 1;
             setSec(value => value + 1);
         }, 1000);
@@ -59,8 +63,11 @@ function GasTracker() {
                 </H5>
 
                 <SizeBox w={5}/>
-                <ToolTip title={'Gas: '}>
-                    Your collateral X Max LTV Short / Token value
+                <ToolTip title={'Gas tracker :'}>
+                    Network usage fee you use will be calculated differently depending on the overall network (currently
+                    Ethereum) usage.
+                    <br/>
+                    This indicator refers to the Gas tracker in etherscan, the character of gas fee can be fluctuate.
                 </ToolTip>
             </div>
 

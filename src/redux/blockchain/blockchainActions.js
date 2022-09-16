@@ -40,10 +40,11 @@ export const connect = async () => {
                 const networkId = await window.ethereum.request({
                     method: "net_version",
                 });
-                if(networkId == 42) {
+                if(networkId == 42 || networkId == 5) {
                     const accounts = await window.ethereum.request({
                         method: "eth_requestAccounts",
                     });
+
                     const NetworkData = await SmartContract.networks[networkId];
                     if (NetworkData) {
                         const SmartContractObj = new web3.eth.Contract(
@@ -61,14 +62,17 @@ export const connect = async () => {
 
                         // Add listeners start
                         window.ethereum.on("accountsChanged", (accounts) => {
+                            console.log('Accounts :');
+                            console.log(accounts);
                             dispatch({type: BLOCK_ACTION_TYPES.BLOCK_RESET});
+                            localStorage.removeItem(DATA_TYPES.AUTH);
                             window.location.reload();
                         });
                         window.ethereum.on("chainChanged", async () => {
                             const networkId = await window.ethereum.request({
                                 method: "net_version",
                             });
-                            if(networkId != process.env.REACT_APP_NETWORK) {
+                            if(networkId !== 42 || networkId !== 5) {
                                 localStorage.removeItem(DATA_TYPES.AUTH);
                             }
                             window.location.reload();

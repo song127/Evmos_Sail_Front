@@ -86,8 +86,8 @@ function SettingToolTip({slip, setSlip, ...props}) {
                             </Sub1>
 
                             <SizeBox w={8}/>
-                            <ToolTip title={'sleep'}>
-                                Slippage
+                            <ToolTip title={'Slippage Tolerance :'}>
+                                Your transaction will revert if the price changes unfavorably by more than this percentage.
                             </ToolTip>
                         </div>
 

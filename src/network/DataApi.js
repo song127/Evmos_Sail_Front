@@ -14,8 +14,7 @@ class DataApi {
         const connector = new ConnectorProvider().factoryConnector(blockchain);
 
         const wallets = await connector.methods.getWallets(blockchain.account).call(
-            {from: blockchain.account},
-            (err,) => {
+            (err) => {
                 if (err) throw err;
             }
         );
@@ -154,13 +153,13 @@ class DataApi {
     }
 
     getShortData = async (blockchain) => {
-        const account = blockchain.account;
         const sub = await new DataApi().getSubWallet(blockchain)
-        LOG(sub);
+        LOG('Sub Wallet :', sub);
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
         const value = await contract.methods.getShort(sub).call();
+        LOG('Short :', value);
 
         return value;
     }
@@ -190,17 +189,16 @@ class DataApi {
     // External Data
     //--------------------------------------------------------------------------------------
     getHealth = async (blockchain) => {
-        const account = blockchain.account;
         const sub = await new DataApi().getSubWallet(blockchain);
         const contract = await new ConnectorProvider().aaveConnector(blockchain);
 
         const value = await contract.methods.getUserAccountData(sub).call();
+        LOG('Health :', value);
 
         return value;
     }
 
     getWEthPath = async (blockchain) => {
-        const account = blockchain.account;
         const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
 
         const value = await contract.methods.WETH().call();
@@ -208,25 +206,36 @@ class DataApi {
         return value;
     }
 
+    getUserData = async (block) => {
+        const contract = await new ConnectorProvider().aaveConnector(block);
+        const sub = await new DataApi().getSubWallet(block);
+
+        const userDatas = await contract.methods.getUserAccountData(sub).call();
+        LOG('User :', userDatas);
+
+        return userDatas;
+    }
+
     getApyETH = async (block) => {
         const contract = await new ConnectorProvider().aaveConnector(block);
         const wEthPath = await this.getWEthPath(block);
 
-        const reserveDataETH = await contract.methods.getReserveData(wEthPath).call();
+        const reserveDataETH = await contract.methods.getReserveData('0xCCa7d1416518D095E729904aAeA087dBA749A4dC').call();
+        LOG('RESERVE :', reserveDataETH);
         const curBorrowRate = reserveDataETH['currentVariableBorrowRate'];
-        LOG(curBorrowRate);
+        LOG('RATE :', curBorrowRate);
 
-        const ray = 10**27;
+        const ray = 10 ** 27;
         const SECONDS_PER_YEAR = 31536000;
 
         const varBorrowAPR = curBorrowRate / ray;
-        const varBorrowAPY = ((1 + (varBorrowAPR / SECONDS_PER_YEAR))**SECONDS_PER_YEAR) - 1;
+        const varBorrowAPY = ((1 + (varBorrowAPR / SECONDS_PER_YEAR)) ** SECONDS_PER_YEAR) - 1;
+        LOG('APY :',varBorrowAPY * 100);
 
         return varBorrowAPY * 100;
     }
 
     getDaiEthRate = async (blockchain, mode) => { // 0: DAI > ETH // 1: ETH > DAI
-        const account = blockchain.account;
         const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
         const wEthPath = await this.getWEthPath(blockchain);
 
@@ -234,14 +243,12 @@ class DataApi {
         let value;
         if (mode === 0) {
             const path = [TokenAddress.DAI, wEthPath];
-            value = await contract.methods.getAmountsOut(amount, path).call(
-                {from: account}
-            );
+            value = await contract.methods.getAmountsOut(amount, path).call();
+            LOG('DAI => ETH : ETH:', value);
         } else {
             const path = [wEthPath, TokenAddress.DAI];
-            value = await contract.methods.getAmountsOut(amount, path).call(
-                {from: account}
-            );
+            value = await contract.methods.getAmountsOut(amount, path).call();
+            LOG('ETH => DAI : DAI :', value);
         }
 
         const result = value[1] / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
@@ -249,17 +256,38 @@ class DataApi {
         return result;
     }
 
+    getEthRate = async (block, amountData) => {
+        const contract = await new ConnectorProvider().uniSwapConnector(block);
+        const wEthPath = await this.getWEthPath(block);
+
+        const path = [TokenAddress.DAI, wEthPath];
+        const amount = web3G.utils.toHex(web3G.utils.toWei(amountData.toString()));
+        const value = await contract.methods.getAmountsIn(amount, path).call();
+
+        const result = value[0] / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+        LOG('HAVE TO REPAY :', result);
+
+        return result;
+    }
+
     getTokensRate = async (token1, token2, blockchain) => {
-        const account = blockchain.account;
         const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
 
-        const value = await contract.methods.getAmountsOut().call(
-            {from: account}
-        );
+        const value = await contract.methods.getAmountsOut().call();
 
         const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
 
         return result;
+    }
+
+    //--------------------------------------------------------------------------------------
+    // Oracle
+    getTokenPrice = async (block, token) => {
+        const contract = await new ConnectorProvider().aaveOracleConnector(block);
+
+        const value = await contract.methods.getAssetPrice(token).call();
+
+        return value;
     }
 
     // Util

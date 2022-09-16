@@ -37,7 +37,7 @@ const stepTitle = [
     'Please reconnect your wallet.'
 ];
 const stepSubtitle = [
-    'Connect your wallet in order to open positions.\n more steps left.',
+    'Connect your wallet in order to open positions.\n2 more steps left.',
     'Your subwallet is only available in Sail protocol.',
     'You’re almost there!',
     'Reconnect your subwallet in order to open position.\nJust click below.'
@@ -62,6 +62,7 @@ function ConnectWallet() {
     const blockchain = useSelector(state => state.blockchain);
     const walletLoading = useSelector(state => state.blockchain.loading);
 
+    const [response, setResponse] = useState(false);
     const [step, setStep] = useState(-1);
     const [loading, setLoading] = useState(true);
 
@@ -69,6 +70,7 @@ function ConnectWallet() {
 
     const walletConnectHandler = async (e) => {
         try {
+            isDisconnected = true;
             const web3Data = await dispatch(await connect());
 
             if (web3Data) {
@@ -83,6 +85,7 @@ function ConnectWallet() {
 
     const createWalletHandler = async (e) => {
         if (step === 1) {
+            isDisconnected = true;
             setLoading(true);
             const result = await actionApi.createWalletW(blockchain);
             if (result) {
@@ -110,7 +113,6 @@ function ConnectWallet() {
         if (wallet !== 'false') {
             dispatch({type: BLOCK_ACTION_TYPES.SET_SUB_WALLET, data: wallet});
             setStep(2);
-            isDisconnected = true;
         } else {
             setStep(1);
         }
@@ -127,10 +129,10 @@ function ConnectWallet() {
     }
 
     useEffect(() => {
-        if(isDisconnected && step > 3) {
+        if(isDisconnected && step > 2) {
             reconnect();
         }
-    }, []);
+    }, [step]);
 
     const checkState = async () => {
         if (!auth && blockchain.account) {
@@ -159,11 +161,10 @@ function ConnectWallet() {
         });
     }, [blockchain.account, blockchain.error]);
 
-    useEffect(() => {
-        if (step === 0) {
-            setLoading(false);
-        }
-    }, [step]);
+    useEffect(async () => {
+        if(response) isDisconnected = true;
+        if(response) await checkState();
+    }, [response]);
 
     useLayoutEffect(() => {
         if (!auth) {
@@ -177,9 +178,9 @@ function ConnectWallet() {
                 <Loading/> :
                 <>
                     {walletModal ?
-                        <WalletModal connect={walletConnectHandler} setLoading={setLoading} setModal={setWalletModal}/>
+                        <WalletModal next={isDisconnected} connect={walletConnectHandler} setLoading={setLoading} setModal={setWalletModal}/>
                         : null}
-                    {modal ? <ApproveModal setModal={setModal}
+                    {modal ? <ApproveModal setModal={setModal} setResponse={setResponse}
                                            daiApp={daiApp} setDaiApp={setDaiApp}
                                            ethApp={ethApp} setEthApp={setEthApp}/>
                         : null

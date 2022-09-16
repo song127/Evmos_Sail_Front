@@ -1,7 +1,7 @@
 import Factory from '../datas/contracts/SubWalletFactory.json';
 import SubWallet from '../datas/contracts/SubWallet.json';
 import UniSwap from "../datas/contracts/UniswapV2Router.json";
-import {AavePoolAbi, TokenAbi} from "../datas/TokenAbi";
+import {AaveOracleAbi, AavePoolAbi, TokenAbi} from "../datas/TokenAbi";
 import {TokenAddress} from "../datas/Address";
 
 class ConnectorProvider {
@@ -11,7 +11,7 @@ class ConnectorProvider {
         const abi = Factory.abi;
         const ContractObj = new web3.eth.Contract(
             abi,
-            Factory.networks["42"].address
+            Factory.networks["5"].address
         );
 
         return ContractObj;
@@ -62,6 +62,18 @@ class ConnectorProvider {
         const Contract = new web3.eth.Contract(
             abi,
             TokenAddress.AAVE_LENDING_POOL
+        );
+
+        return Contract;
+    }
+
+    aaveOracleConnector = (block) => {
+        const web3 = block.web3;
+
+        const abi = AaveOracleAbi;
+        const Contract = new web3.eth.Contract(
+            abi,
+            TokenAddress.AAVE_ORACLE
         );
 
         return Contract;

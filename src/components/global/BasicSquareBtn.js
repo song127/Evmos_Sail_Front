@@ -17,9 +17,10 @@ const Container = styled.button`
   opacity: 0.95;
 
   font-family: Montserrat;
-  font-size: 14px;
+  font-style: normal;
   font-weight: 500;
-  line-height: 17px;
+  font-size: 12px;
+  line-height: 15px;
   color: ${c.gray};
 
   transition: all 0.3s;

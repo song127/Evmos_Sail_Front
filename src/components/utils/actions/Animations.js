@@ -20,6 +20,7 @@ export const FadeInTopDownAni = keyframes`
     opacity: 1;
     transform-origin: top;
   }
+  
 `;
 
 export const FadeInAni = keyframes`
