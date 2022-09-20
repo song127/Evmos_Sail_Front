@@ -1,5 +1,3 @@
-import styled from 'styled-components';
-import {COLORS as c} from "../../styles/colors";
 import CircularProgress, {
     circularProgressClasses,
 } from '@mui/material/CircularProgress';
