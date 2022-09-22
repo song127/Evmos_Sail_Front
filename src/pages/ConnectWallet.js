@@ -1,5 +1,3 @@
-import styled from "styled-components";
-import {COLORS as c} from "../styles/colors";
 import {ReactComponent as Logo} from "../assets/icons/icon-logo.svg";
 import SizeBox from "../components/utils/blocks/SizeBox";
 import SquareBtn from "../components/global/SquareBtn";
@@ -14,7 +12,6 @@ import {BLOCK_ACTION_TYPES} from "../redux/blockchain/blockchainReducer";
 import ApproveModal from "../components/global/modals/ApproveModal";
 import H6 from "../components/utils/texts/H6";
 import H2 from "../components/utils/texts/H2";
-import {LOG} from "../styles/utils";
 import {WALLET_ERRORS} from "../network/errors/WalletErrors";
 import WalletModal from "../components/global/modals/WalletModal";
 import {useNavigate} from "react-router-dom";
@@ -180,7 +177,7 @@ function ConnectWallet() {
                 <Loading/> :
                 <>
                     {walletModal ?
-                        <WalletModal next={isDisconnected} connect={walletConnectHandler} setLoading={setLoading}
+                        <WalletModal connect={walletConnectHandler} setLoading={setLoading}
                                      setModal={setWalletModal}/>
                         : null}
                     {modal ? <ApproveModal setModal={setModal} setResponse={setResponse}

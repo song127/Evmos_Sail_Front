@@ -129,7 +129,7 @@ function Header() {
                 <Spacer/>
 
                 <SizeBox w={144} h={36}>
-                    <SquareBtn type={1} active={true} onClick={() => handleLogin()}>
+                    <SquareBtn type={1} active={auth === 'true'} onClick={() => handleLogin()}>
                         {auth ? 'Disconnect' : 'Connect Wallet'}
                     </SquareBtn>
                 </SizeBox>

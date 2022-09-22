@@ -33,26 +33,30 @@ function GasTracker() {
     const [gasFee, setGasFee] = useState(0.0);
     const [sec, setSec] = useState(0);
     let mounted = true;
-    let secV = 0
+    let secV = 0;
 
-    useEffect(async () => {
+    const initCheck = async () => {
         const gasFeeData = parseFloat(await web3.eth.getGasPrice());
         if (!mounted) return;
         setGasFee(gasFeeData / web3.utils.toBN(10)
             .pow(web3.utils.toBN(9)));
         setInterval(async () => {
             if (secV >= 10) {
-                if(!mounted) return;
                 const gasFeeData = parseFloat(await web3.eth.getGasPrice());
+                if (!mounted) return;
                 setGasFee(gasFeeData / web3.utils.toBN(10)
                     .pow(web3.utils.toBN(9)));
                 secV = 0;
                 setSec(0);
             }
-            if(!mounted) return;
-            secV += 1;
+            if (!mounted) return;
+            secV++;
             setSec(value => value + 1);
         }, 1000);
+    }
+
+    useEffect(() => {
+        initCheck();
     }, []);
 
     return (

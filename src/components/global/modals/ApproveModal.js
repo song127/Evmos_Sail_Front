@@ -103,7 +103,7 @@ function ApproveModal({setModal, setResponse, daiApp = false, setDaiApp, ethApp 
         setIsAll(true);
     }, [collateral, short]);
 
-    useEffect(async () => {
+    const initCheck = async () => {
         if (blockchain.account) {
             const tokenData = await dataApi.isApprovedAavePool(blockchain);
             setDaiApp(tokenData);
@@ -112,9 +112,13 @@ function ApproveModal({setModal, setResponse, daiApp = false, setDaiApp, ethApp 
 
             setLoading(false);
         }
-    }, [blockchain]);
+    }
 
-    const [err, setErr] = useState(0);
+    useEffect(() => {
+        initCheck();
+    }, [blockchain.account]);
+
+    // const [err, setErr] = useState(0);
 
     const approveToken = async () => {
         setLoading(true);
@@ -122,9 +126,9 @@ function ApproveModal({setModal, setResponse, daiApp = false, setDaiApp, ethApp 
         if (result) {
             setResponse(true);
             setModal(false);
-            setErr(1);
+            // setErr(1);
         } else {
-            setErr(2);
+            // setErr(2);
         }
         setLoading(false);
     }

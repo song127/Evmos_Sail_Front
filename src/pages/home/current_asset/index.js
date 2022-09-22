@@ -19,8 +19,6 @@ import Spacer from "../../../components/utils/blocks/Spacer";
 import SubValueBackBoard from "../../../components/global/SubValueBackBoard";
 import Token from "../../../components/global/Token";
 import ToolTip from "../../../components/global/ToolTip";
-import Sub2 from "../../../components/utils/texts/Sub2";
-import Sub3 from "../../../components/utils/texts/Sub3";
 import Body1 from "../../../components/utils/texts/Body1";
 
 const web3 = new Web3('');
@@ -138,7 +136,6 @@ const DashedDivider = styled.div`
 
 function CurrentAsset() {
     const dispatch = useDispatch();
-    const data = useSelector(state => state.data);
     const blockchain = useSelector(state => state.blockchain);
     const dataApi = new DataApi();
 
@@ -206,7 +203,7 @@ function CurrentAsset() {
                 });
             }
         }
-    }, [blockchain]);
+    }, [blockchain.account]);
 
     return (
         <>

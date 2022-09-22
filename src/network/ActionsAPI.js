@@ -1,6 +1,4 @@
-import {TokenAbi} from "../datas/TokenAbi";
 import {TokenAddress} from "../datas/Address";
-import SubWallet from "../datas/contracts/SubWallet.json";
 import ConnectorProvider from "./ConnectorProvider";
 import DataApi from "./DataApi";
 import {LOG} from "../styles/utils";
@@ -41,7 +39,7 @@ class ActionsAPI {
                 calculatedApproveValue
             ).send(
                 {from: account, gas: 400000},
-                function (err, tx) {
+                function (err) {
                     if (err) result = false;
                 }
             );
@@ -65,7 +63,7 @@ class ActionsAPI {
         try {
             await contract.methods.depositToken(TokenAddress.DAI, value).send(
                 {from: account, gas: 400000},
-                function (err, tx) {
+                function (err) {
                     if (err) result = false;
                 }
             );
@@ -89,7 +87,7 @@ class ActionsAPI {
         try {
             await contract.methods.withdrawToken(TokenAddress.DAI, value).send(
                 {from: account, gas: 400000},
-                function (err, tx) {
+                function (err) {
                     if (err) result = false;
                 }
             );
@@ -107,9 +105,6 @@ class ActionsAPI {
 
         const contract = await new ConnectorProvider().walletConnector(blockchain, sub);
 
-        const tokenDecimals = web3.utils.toBN(18);
-        const tokenAmountToApprove = web3.utils.toBN(9000000);
-        const calculatedApproveValue = web3.utils.toHex(tokenAmountToApprove.mul(web3.utils.toBN(10).pow(tokenDecimals)));
         const daiValue = web3.utils.toHex(web3.utils.toWei('9999999'));
         const ethValue = web3.utils.toHex("115792089237316195423570985008687907853269984665640564039457584007913129639935");
 
@@ -121,7 +116,7 @@ class ActionsAPI {
                 ethValue
             ).send(
                 {from: account, gas: 500000},
-                function (err, tx) {
+                function (err) {
                     if (err) {
                         result = false;
                         throw err;
@@ -243,7 +238,7 @@ class ActionsAPI {
         try {
             await contract.methods.shortEndEth().send(
                 {from: account, gas: 20000000},
-                function (err, tx) {
+                function (err) {
                     if (err) result = false;
                 }
             );

@@ -1,23 +1,17 @@
 import styled from "styled-components";
 import {COLORS as c} from "../../../styles/colors";
 import ModalWrapper from "./ModalWrapper";
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import CircularProgress, {
     circularProgressClasses,
 } from '@mui/material/CircularProgress';
-import {ReactComponent as Back} from "../../../assets/icons/icon-left_arrow.svg";
 import {ReactComponent as X} from "../../../assets/icons/icon-x.svg";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {WALLET_ERRORS} from "../../../network/errors/WalletErrors";
 import Spacer from "../../utils/blocks/Spacer";
-import {rgbToHex} from "@mui/material";
 import H4 from "../../utils/texts/H4";
 import SizeBox from "../../utils/blocks/SizeBox";
-import Sub2 from "../../utils/texts/Sub2";
 import BasicSquareBtn from "../BasicSquareBtn";
-import {LOG} from "../../../styles/utils";
-import Sub1 from "../../utils/texts/Sub1";
-import H6 from "../../utils/texts/H6";
 import Sub3 from "../../utils/texts/Sub3";
 import SquareBtn from "../SquareBtn";
 
@@ -34,13 +28,6 @@ const BackBoard = styled.div`
   border-radius: 16px;
 `;
 
-const BackBtn = styled(Back)`
-  cursor: pointer;
-  
-  width: 24px;
-  height: 24px;
-`;
-
 const XBtn = styled(X)`
   cursor: pointer;
   
@@ -48,14 +35,14 @@ const XBtn = styled(X)`
   height: 24px;
 `;
 
-const stateTitle = [
-    'Connecting Error'
-];
-const stateDesc = [
-    'Connecting wallet failed.\nPlease try again.'
-];
+// const stateTitle = [
+//     'Connecting Error'
+// ];
+// const stateDesc = [
+//     'Connecting wallet failed.\nPlease try again.'
+// ];
 
-function WalletModal({next, setModal, setLoading, connect, ...props}) {
+function WalletModal({setModal, setLoading, connect, ...props}) {
     const block = useSelector(state1 => state1.blockchain);
     const state = useSelector(state1 => state1.blockchain.error);
     const loading = useSelector(state1 => state1.blockchain.loading);
@@ -64,9 +51,8 @@ function WalletModal({next, setModal, setLoading, connect, ...props}) {
         if(block.account) {
             setModal(false);
             setLoading(true);
-            next = true;
         }
-    }, [block.account]);
+    }, [block.account, setModal, setLoading]);
 
     return (
         <ModalWrapper>

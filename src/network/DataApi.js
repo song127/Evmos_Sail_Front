@@ -175,16 +175,16 @@ class DataApi {
         return result;
     }
 
-    getTotalProfit = async (block) => {
-        const sub = await new DataApi().getSubWallet(block);
-
-        const contract = await new ConnectorProvider().walletConnector(block, sub);
-
-        const value = await contract.methods.totalProfit().call();
-        const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
-
-        return result;
-    }
+    // getTotalProfit = async (block) => {
+    //     const sub = await new DataApi().getSubWallet(block);
+    //
+    //     const contract = await new ConnectorProvider().walletConnector(block, sub);
+    //
+    //     const value = await contract.methods.totalProfit().call();
+    //     const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+    //
+    //     return result;
+    // }
 
     // External Data
     //--------------------------------------------------------------------------------------
@@ -206,19 +206,19 @@ class DataApi {
         return value;
     }
 
-    getUserData = async (block) => {
-        const contract = await new ConnectorProvider().aaveConnector(block);
-        const sub = await new DataApi().getSubWallet(block);
-
-        const userDatas = await contract.methods.getUserAccountData(sub).call();
-        LOG('User :', userDatas);
-
-        return userDatas;
-    }
+    // getUserData = async (block) => {
+    //     const contract = await new ConnectorProvider().aaveConnector(block);
+    //     const sub = await new DataApi().getSubWallet(block);
+    //
+    //     const userDatas = await contract.methods.getUserAccountData(sub).call();
+    //     LOG('User :', userDatas);
+    //
+    //     return userDatas;
+    // }
 
     getApyETH = async (block) => {
         const contract = await new ConnectorProvider().aaveConnector(block);
-        const wEthPath = await this.getWEthPath(block);
+        // const wEthPath = await this.getWEthPath(block);
 
         const reserveDataETH = await contract.methods.getReserveData('0xCCa7d1416518D095E729904aAeA087dBA749A4dC').call();
         LOG('RESERVE :', reserveDataETH);
@@ -256,29 +256,29 @@ class DataApi {
         return result;
     }
 
-    getEthRate = async (block, amountData) => {
-        const contract = await new ConnectorProvider().uniSwapConnector(block);
-        const wEthPath = await this.getWEthPath(block);
-
-        const path = [TokenAddress.DAI, wEthPath];
-        const amount = web3G.utils.toHex(web3G.utils.toWei(amountData.toString()));
-        const value = await contract.methods.getAmountsIn(amount, path).call();
-
-        const result = value[0] / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
-        LOG('HAVE TO REPAY :', result);
-
-        return result;
-    }
-
-    getTokensRate = async (token1, token2, blockchain) => {
-        const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
-
-        const value = await contract.methods.getAmountsOut().call();
-
-        const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
-
-        return result;
-    }
+    // getEthRate = async (block, amountData) => {
+    //     const contract = await new ConnectorProvider().uniSwapConnector(block);
+    //     const wEthPath = await this.getWEthPath(block);
+    //
+    //     const path = [TokenAddress.DAI, wEthPath];
+    //     const amount = web3G.utils.toHex(web3G.utils.toWei(amountData.toString()));
+    //     const value = await contract.methods.getAmountsIn(amount, path).call();
+    //
+    //     const result = value[0] / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+    //     LOG('HAVE TO REPAY :', result);
+    //
+    //     return result;
+    // }
+    //
+    // getTokensRate = async (token1, token2, blockchain) => {
+    //     const contract = await new ConnectorProvider().uniSwapConnector(blockchain);
+    //
+    //     const value = await contract.methods.getAmountsOut().call();
+    //
+    //     const result = value / web3G.utils.toBN(10).pow(web3G.utils.toBN(18));
+    //
+    //     return result;
+    // }
 
     //--------------------------------------------------------------------------------------
     // Oracle

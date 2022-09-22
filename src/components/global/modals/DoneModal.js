@@ -8,7 +8,6 @@ import {Link} from "react-router-dom";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import {useDispatch} from "react-redux";
 import H4 from "../../utils/texts/H4";
-import Body1 from "../../utils/texts/Body1";
 import Body0 from "../../utils/texts/Body0";
 
 const BackBoard = styled.div`
@@ -68,7 +67,7 @@ function DoneModal({title, content, setModal, type, link, ...props}) {
                 </Body0>
 
                 <SizeBox h={40}/>
-                {link != undefined ? <div className={'f-row j-space'}>
+                {link !== undefined ? <div className={'f-row j-space'}>
                     <Btn yes={false} onClick={() => setModal(false)}>
                         Not Now
                     </Btn>

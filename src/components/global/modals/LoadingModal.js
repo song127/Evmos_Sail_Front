@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import ModalWrapper from "./ModalWrapper";
 import SizeBox from "../../utils/blocks/SizeBox";
-import {useDispatch} from "react-redux";
 import {ReactComponent as Logo} from "../../../assets/icons/icon-logo.svg";
 import LinearProgress, {linearProgressClasses} from '@mui/material/LinearProgress';
 import {COLORS as c} from "../../../styles/colors";

@@ -1,14 +1,12 @@
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {DATA_TYPES} from "../../../redux/data/dataReducer";
 import {useEffect} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {connect} from "../../../redux/blockchain/blockchainActions";
-import {BLOCK_ACTION_TYPES} from "../../../redux/blockchain/blockchainReducer";
 
 function CheckConnect() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const blockchain = useSelector(state => state.blockchain);
     const auth = localStorage.getItem(DATA_TYPES.AUTH);
     const {location} = useLocation();
 
@@ -41,8 +39,8 @@ function CheckConnect() {
         }
     }
 
-    useEffect(async () => {
-        await isConnected()
+    useEffect(() => {
+        isConnected();
     }, [auth, location]);
 
     return null;

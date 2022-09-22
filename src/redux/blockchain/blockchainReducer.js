@@ -1,5 +1,3 @@
-import {WALLET_ERRORS} from "../../network/errors/WalletErrors";
-
 export const BLOCK_ACTION_TYPES = {
     CONNECTION_REQUEST: 'CONNECTION_REQUEST',
     CONNECTION_SUCCESS: 'CONNECTION_SUCCESS',

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {COLORS as c} from "../../styles/colors";
-import {Slider, SliderThumb} from '@mui/material';
+import {Slider} from '@mui/material';
 import SizeBox from "../utils/blocks/SizeBox";
 
 const BackBoard = styled.div`
