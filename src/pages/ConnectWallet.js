@@ -129,7 +129,7 @@ function ConnectWallet() {
     }
 
     useEffect(() => {
-        if(isDisconnected && step > 2) {
+        if (isDisconnected && step > 2) {
             reconnect();
         }
     }, [step]);
@@ -153,17 +153,19 @@ function ConnectWallet() {
         }
     }, [walletLoading, step, loading]);
 
+    let load = false;
+
     useEffect(async () => {
         await checkState().then(() => {
-            if (blockchain.account !== null || step === 0) {
-                setLoading(false);
-            }
+            setLoading(true);
+        }).catch(() => {
+            setLoading(false);
         });
     }, [blockchain.account, blockchain.error]);
 
     useEffect(async () => {
-        if(response) isDisconnected = true;
-        if(response) await checkState();
+        if (response) isDisconnected = true;
+        if (response) await checkState();
     }, [response]);
 
     useLayoutEffect(() => {
@@ -178,7 +180,8 @@ function ConnectWallet() {
                 <Loading/> :
                 <>
                     {walletModal ?
-                        <WalletModal next={isDisconnected} connect={walletConnectHandler} setLoading={setLoading} setModal={setWalletModal}/>
+                        <WalletModal next={isDisconnected} connect={walletConnectHandler} setLoading={setLoading}
+                                     setModal={setWalletModal}/>
                         : null}
                     {modal ? <ApproveModal setModal={setModal} setResponse={setResponse}
                                            daiApp={daiApp} setDaiApp={setDaiApp}

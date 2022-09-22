@@ -115,7 +115,7 @@ function ShortEnd({setLoading, setTitle, setContent, setLink, setModal, setType,
             setTitle('Successfully completed Short end');
             setContent('Short end requirement has been sent to our server successfully.\n' +
                 'Good to go, bro!');
-            setLink('/Short');
+            setLink('/short');
             modalHandler();
         } else {
             setTitle('Short End Failed');
